@@ -269,8 +269,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat header .ava{cursor:pointer}
 .sphere{min-height:480px;padding:0}
 .planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
-.planetbox .bubble{width:min(300px,62%);height:auto;aspect-ratio:1;object-fit:contain;animation:spinb 28s linear infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
-@keyframes spinb{to{transform:rotate(360deg)}}
+.planetbox .bubble{height:92%;width:auto;max-width:92%;aspect-ratio:1;object-fit:contain;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
+@keyframes bob{0%,100%{transform:translateY(-10px)}50%{transform:translateY(10px)}}
 @media(prefers-reduced-motion:reduce){.planetbox .bubble{animation:none}}
 .planetbox canvas{width:100%;height:100%;display:block}
 .pin{z-index:2;font-size:14px;padding:10px 16px 10px 13px;gap:8px}
@@ -369,7 +369,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
   </aside>
 
   <section class="dash" id="cols" hidden></section>
-  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
+  <details class="settings"><summary>Cài đặt</summary><button id="open3d" class="gbtn" type="button">Xem đồ họa 3D</button><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
@@ -803,8 +803,7 @@ function renderCols(){
 
   const hd=ce('div','dhead');
   const ht=ce('div');ht.append(ce('div','eyebrow','Tổng quan văn phòng'),ce('div','bigno',String(scoped.length)),ce('div','mut',org?org.name:'Tất cả tổ chức'));
-  const gb=ce('button','gbtn','Xem đồ họa 3D');gb.onclick=()=>{g3d.checked=true;setMode3d(true)};
-  hd.append(ht,gb);c.appendChild(hd);
+  hd.append(ht);c.appendChild(hd);
 
   const g=ce('div','dgrid');
   const L=ce('div','dcol');
@@ -848,7 +847,8 @@ function renderCols(){
     card.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     strip.appendChild(card);
   });
-  hd.insertBefore(strip,gb);
+  hd.appendChild(strip);
+  $('open3d').onclick=()=>{g3d.checked=true;setMode3d(true)};
 
   if(org){
     const bd=ce('div','board');
