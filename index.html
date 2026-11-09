@@ -416,6 +416,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .gcard .gtag i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--c,#c59bff);box-shadow:0 0 8px var(--c,#c59bff);margin-right:7px;vertical-align:1px}
 .gcard p{color:#d8cdf2}
 .gcard .gx{color:#f4f0ff}
+.gcard.r p{font-size:12px;line-height:1.55;margin-top:8px}
 .gcard.r{right:18px;top:50%;bottom:auto;transform:translateY(-50%)}
 .gcard.l{left:18px;top:50%;right:auto;bottom:auto;width:min(230px,30%);transform:translateY(-50%);background:linear-gradient(160deg,rgba(40,22,80,.72),rgba(10,6,22,.78));border:1px solid rgba(197,155,255,.4);border-top:2px solid var(--c,#c59bff);color:#f4f0ff}
 .gcard.l .grow{display:flex;gap:8px;margin-top:12px}
@@ -881,6 +882,12 @@ function initPlanet(){
 }
 function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);}
 let infoAgent=null,listOpen=true;
+const BRAND_COPY={
+  cmd:{intro:'Trung tâm chỉ huy đặt giữa các vì sao. Mọi tín hiệu từ chị đều đi qua đây trước: Chief of Staff phân loại, Task Router xác định thương hiệu, Quality Control kiểm tra chất lượng rồi mới chuyển xuống hành tinh đích. Bảy agent cùng giữ nhịp, để không việc nào lạc quỹ đạo.'},
+  bq:{intro:'Hành tinh xanh lục, nơi các chiến dịch được gieo rồi lớn lên. Supervisor giữ trục, Team Leader chia việc cho sáu agent chuyên môn: nội dung, quảng cáo, nghiên cứu sản phẩm, nghiên cứu thị trường, xu hướng và sáng tạo. Mỗi kế hoạch đều đi qua một vòng kiểm định trước khi thành hình.'},
+  mka:{intro:'Hành tinh xanh dương, nhìn về phía Đông và lắng nghe nhịp thị trường từ rất xa. Tám agent của Asia New Vision đo quảng cáo, nghiên cứu xu hướng và giữ kế hoạch đúng quỹ đạo, để mỗi chiến dịch đi đúng hướng.'},
+  el:{intro:'Hành tinh cam vàng, nơi ánh sáng hội tụ vào từng ống kính. Tám agent của Ember Lens biến ý tưởng thành hình ảnh: từ nội dung, sáng tạo đến đo lường quảng cáo, mọi thứ đều được chuẩn bị để tỏa sáng đúng lúc.'}
+};
 const GPOS={cmd:[22,-60],bq:[-5,0],mka:[-28,55],el:[38,25]};
 let GL=null,globeStarted=false;
 const SPIN=0;
@@ -968,6 +975,16 @@ function renderCols(){
     p.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     M.appendChild(p);pinEls.push(p);
   });
+  if(bo){
+    const C=BRAND_COPY[bo.id]||{};
+    const ln=all.filter(a=>a.dept===bo.id),rd2=ln.filter(a=>a.status==='ready').length;
+    const gr=ce('div','gcard r');gr.style.setProperty('--c',bo.c);
+    const gx=ce('button','gx','✕');gx.type='button';gx.title='Đóng';gx.onclick=()=>{listOrg=null;renderCols()};
+    const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode(ln.length+' agent · '+rd2+' sẵn sàng'));
+    const pk=ce('p',null,'Đang mạnh: Chưa có dữ liệu');const pt=ce('p',null,'Đang bám thị trường: Chưa có dữ liệu');
+    gr.append(gx,tg,ce('h4',null,bo.name),ce('p',null,C.intro||''),pk,pt);
+    M.appendChild(gr);
+  }
   const prev=GL&&GL.cv.isConnected?GL.rot:0;
   GL={cv,pinEls,rot:prev,shift:!!bo,target:bo?-GPOS[bo.id][1]*Math.PI/180:null};
   if(!globeStarted){globeStarted=true;requestAnimationFrame(globeTick);}
