@@ -161,7 +161,8 @@ body .oc.brk .sub2{color:var(--mut)}
 .tok input{flex:1;min-width:160px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;font:14px var(--f)}
 .tok button{border:0;border-radius:999px;padding:7px 14px;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);color:#fff;font:800 13px var(--f-d);cursor:pointer}
 .tok span{font-size:12px;color:var(--mut)}
-#chat{position:fixed;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(520px,70vh);display:flex;flex-direction:column;background:rgba(8,8,12,.94);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:20;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#chat[hidden]{display:none!important}
+#chat{position:fixed;right:84px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(520px,70vh);display:flex;flex-direction:column;background:rgba(8,8,12,.94);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:20;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 #chat[hidden]{display:none!important}
 #chat header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.15);font:800 15px var(--f-d)}
 #chat header button{border:0;background:none;color:#fff;cursor:pointer;font:700 13px var(--f)}
@@ -278,11 +279,12 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .pin b{font:800 16px var(--f-d)}
 .sphere::before{content:"";position:absolute;left:50%;top:50%;width:72%;aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(140,110,230,.4);transform:translate(-50%,-50%) rotateX(72deg);pointer-events:none;z-index:1;animation:orbit 18s linear infinite}
 @keyframes orbit{to{transform:translate(-50%,-50%) rotateX(72deg) rotate(360deg)}}
-.pin{padding:6px 16px 6px 6px;gap:10px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,255,255,.7));border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 30px -8px var(--c),inset 0 1px 0 #fff;animation:floaty 6s ease-in-out infinite;backdrop-filter:blur(12px)}
-.pin:nth-child(2){animation-delay:-1.5s}
-.pin:nth-child(3){animation-delay:-3s}
-.pin:nth-child(4){animation-delay:-4.5s}
-@keyframes floaty{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
+.pin{padding:6px 16px 6px 6px;gap:10px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,255,255,.7));border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 30px -8px var(--c),inset 0 1px 0 #fff;backdrop-filter:blur(12px)}
+.pin b{animation:floaty 6s ease-in-out infinite}
+.pin:nth-child(2) b{animation-delay:-1.5s}
+.pin:nth-child(3) b{animation-delay:-3s}
+.pin:nth-child(4) b{animation-delay:-4.5s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .pin::before{display:none}
 .pin b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,#fff 0%,var(--c) 70%);color:#fff;font:800 15px var(--f-d);text-shadow:0 1px 2px rgba(0,0,0,.25);box-shadow:0 4px 10px -2px var(--c)}
 .pin span{font:700 14px var(--f);letter-spacing:.01em}
@@ -296,7 +298,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .dgrid{grid-template-columns:240px 1fr}
 .ostrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
 .dhead .ostrip{flex:1 1 560px;min-width:0;margin-top:0}
-.tphead{position:sticky;top:0;z-index:3;margin:-16px -16px 0;padding:16px 16px 10px;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:22px 22px 0 0}
+.tphead{position:sticky;top:0;z-index:3;margin:-16px -16px 0;padding:16px 16px 10px;background:var(--panel);border-radius:22px 22px 0 0}
 .tphead .ct{margin-bottom:10px}
 .ainfo{margin-top:12px;border-radius:18px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);box-shadow:0 8px 24px rgba(120,100,200,.12)}
 .ah{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -306,6 +308,9 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .ai{display:flex;gap:10px;align-items:baseline}
 .ai small{width:118px;flex:none;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 .ai span{font-size:13px;line-height:1.4}
+.heads{position:fixed;right:14px;bottom:16px;z-index:21;display:flex;flex-direction:column;align-items:center;gap:12px}
+.heads:empty{display:none}
+.heads .tav{width:52px;height:52px;border-width:3px;font:800 14px var(--f-d);box-shadow:0 10px 24px rgba(120,100,200,.3)}
 .threads{display:flex;gap:10px;padding:10px 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px dashed rgba(150,130,220,.35)}
 .threads:empty{display:none}
 .threads::-webkit-scrollbar{display:none}
@@ -313,6 +318,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .tav.on{box-shadow:0 0 0 3px var(--c),0 4px 12px rgba(150,120,255,.25)}
 .tav .unr{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:10px;background:#ff3b5c;color:#fff;font:700 11px/19px var(--f);font-style:normal;text-align:center;padding:0 5px;box-shadow:0 0 0 2px #fff}
 @media(max-width:640px){
+  #chat{right:76px;width:calc(100vw - 96px)}
+  .heads .tav{width:44px;height:44px}
   .dcol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .dcol>.dcard{grid-column:1/-1}
   .pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:2px 4px 6px}
@@ -394,14 +401,14 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div id="threads" class="threads"></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {RoundedBoxGeometry} from './RoundedBoxGeometry.js';
 
 const ORGS=[
-  {id:'cmd',name:'Atelier Command',c:'#8fb3ff',t:'#3b64c9'},
+  {id:'cmd',name:'Atelier Command',c:'#a77bff',t:'#6b3fd1'},
   {id:'bq',name:'Bách Quang',c:'#ff7ab0',t:'#d43f7f'},
   {id:'mka',name:'Asia New Vision',c:'#6ea8ff',t:'#2f6fd6'},
   {id:'el',name:'Ember Lens',c:'#ffb36b',t:'#c46a1f'}
@@ -808,7 +815,9 @@ function initPlanet(){
 function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);}
 let infoAgent=null;
 function renderCols(){
-  const c=$('cols');c.textContent='';
+  const c=$('cols');
+  const oldTp=c.querySelector('.tphead')?.parentElement;const keepTop=oldTp?oldTp.scrollTop:0;const keepWin=window.scrollY;
+  c.textContent='';
   const all=state.agents,tasks=state.tasks||[];
   const orgOf=t=>{const a=all.find(x=>x.id===t.agent);return a?a.dept:null;};
   const scoped=all.filter(a=>!listOrg||a.dept===listOrg);
@@ -917,6 +926,7 @@ function renderCols(){
     const td=ce('td');td.appendChild(ce('span','st '+(a.status||'off'),LABEL[a.status]||''));tr.appendChild(td);body.appendChild(tr);
   });
   tp.appendChild(tb);c.appendChild(tp);
+  tp.scrollTop=keepTop;window.scrollTo(0,keepWin);
 }
 function setMode3d(on){
   $('stage').hidden=!on;document.querySelector('aside').hidden=!on;
@@ -960,7 +970,7 @@ function initials(n){const w=n.split(' – ')[0].split(/\s+/).filter(x=>x&&x.toL
 function unread(id){return Math.max(0,(known[id]||0)-(seen[id]||0));}
 function touchThread(id){if(!threads.includes(id))threads.push(id);saveThreads();}
 function renderThreads(){
-  const box=$('threads');if(!box)return;box.textContent='';
+  const box=$('heads');if(!box)return;box.textContent='';
   [...new Set([...threads,chatA&&chatA.id].filter(Boolean))].forEach(id=>{
     const a=state.agents.find(x=>x.id===id);if(!a)return;
     const o=ORGS.find(z=>z.id===a.dept);const on=!!(chatA&&chatA.id===id);
