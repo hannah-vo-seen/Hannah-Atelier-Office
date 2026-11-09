@@ -142,10 +142,16 @@ body.light .hero{background:linear-gradient(120deg,#ffe3f0 0%,#e6ecff 55%,#dcf7e
 .gbtn:hover{filter:brightness(1.05)}
 .hero{position:relative;overflow:hidden;min-height:150px}
 .hero>div,.hero>.gbtn{position:relative;z-index:1}
-.orb{position:absolute;right:-24px;top:-46px;width:min(300px,62vw);height:min(260px,52vw);pointer-events:none;z-index:0;border-radius:58% 42% 61% 39%/45% 55% 45% 55%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 4%,rgba(255,255,255,0) 15%),conic-gradient(from 210deg,#ff7ad9,#9b6bff,#5aa8ff,#ffa3e0,#ff7ad9);box-shadow:inset -18px -22px 40px rgba(20,8,60,.45),inset 14px 16px 30px rgba(255,255,255,.35),0 0 60px rgba(160,90,255,.55);opacity:.95;animation:morph 9s ease-in-out infinite}
+@media(max-width:860px){.hero>div{max-width:58%}}
+.orb{position:absolute;right:clamp(14px,5vw,56px);top:50%;width:min(170px,38vw);height:min(170px,38vw);transform:translateY(-50%);pointer-events:none;z-index:0;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 5%,rgba(255,255,255,0) 22%),radial-gradient(circle at 68% 78%,rgba(255,255,255,.35),transparent 45%),linear-gradient(160deg,var(--c,#ff8fc0),var(--c2,#7fb2ff) 60%,#a78bfa);box-shadow:inset -14px -18px 34px rgba(20,8,60,.35),inset 10px 12px 24px rgba(255,255,255,.35),0 0 54px color-mix(in srgb,var(--c,#ff8fc0) 55%,transparent);animation:float 6s ease-in-out infinite}
+.orb::after{content:"";position:absolute;left:-22%;right:-22%;top:40%;height:24%;border:2px solid rgba(255,255,255,.75);border-radius:50%;transform:rotate(-16deg);box-shadow:0 0 14px rgba(255,255,255,.45);border-bottom-color:transparent}
 body.light .orb{box-shadow:inset -18px -22px 40px rgba(60,30,120,.25),inset 14px 16px 30px rgba(255,255,255,.5),0 0 50px rgba(160,120,255,.35)}
-@keyframes morph{0%,100%{border-radius:58% 42% 61% 39%/45% 55% 45% 55%}50%{border-radius:42% 58% 35% 65%/60% 40% 60% 40%}}
+@keyframes float{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 8px))}}
 @media(prefers-reduced-motion:reduce){.orb{animation:none}}
+.pill-f,.gbtn,.btn,.zoom button,#subbar button{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 6px 18px rgba(0,0,0,.16);transition:transform .15s ease,filter .15s ease}
+.pill-f:hover,.gbtn:hover,.btn:hover,.zoom button:hover,#subbar button:hover{transform:translateY(-1px);filter:brightness(1.06)}
+body.list-mode .pill-f.on.all{background:linear-gradient(90deg,#ff8fc0,#a78bfa 50%,#7fb2ff);color:#fff;border-color:transparent}
+body.list-mode .pill-f.on:not(.all){background:var(--c,#9d7bff);color:#fff;border-color:transparent}
 </style>
 </head>
 <body>
@@ -541,11 +547,12 @@ function renderCols(){
   hero.innerHTML='<div><div class="eyebrow">Tổng quan văn phòng</div><h2>Hannah Atelier Office</h2><p>Theo dõi trạng thái '+all.length+' agent theo tổ chức và phòng ban.</p></div>';
   const gb=document.createElement('button');gb.className='gbtn';gb.textContent='Xem đồ họa 3D';
   gb.onclick=()=>{g3d.checked=true;setMode3d(true)};
+  const oc=listOrg?ORGS.find(o=>o.id===listOrg):null;hero.style.setProperty('--c',oc?oc.c:'#ff8fc0');hero.style.setProperty('--c2',oc?'color-mix(in srgb,'+oc.c+' 45%,#ffffff)':'#7fb2ff');
   hero.insertAdjacentHTML('afterbegin','<div class="orb" aria-hidden="true"></div>');
   hero.appendChild(gb);c.appendChild(hero);
   const pills=document.createElement('div');pills.className='pills';
-  const mkp=(label,id)=>{const b=document.createElement('button');b.className='pill-f'+(listOrg===id?' on':'');b.textContent=label;b.onclick=()=>{listOrg=id;renderCols()};pills.appendChild(b)};
-  mkp('Tất cả',null);ORGS.forEach(o=>mkp(o.name,o.id));c.appendChild(pills);
+  const mkp=(label,id,col)=>{const b=document.createElement('button');b.className='pill-f'+(listOrg===id?' on':'')+(id?'':' all');if(col)b.style.setProperty('--c',col);b.textContent=label;b.onclick=()=>{listOrg=id;renderCols()};pills.appendChild(b)};
+  mkp('Tất cả',null);ORGS.forEach(o=>mkp(o.name,o.id,o.c));c.appendChild(pills);
   const cnt=k=>all.filter(a=>a.status===k).length;
   const st=document.createElement('div');st.className='stats4';
   [['Agent',all.length],['Sẵn sàng',cnt('ready')],['Đang chờ',cnt('waiting')],['Chưa xây',cnt('planned')]].forEach(([l,v])=>{
