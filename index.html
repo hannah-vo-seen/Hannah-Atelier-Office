@@ -57,7 +57,7 @@ aside{background:var(--panel);border-radius:20px;padding:12px 14px;display:flex;
 .note{grid-column:1/-1;color:var(--mut);font-size:12.5px}
 @media(max-width:860px){.wrap{grid-template-columns:1fr;height:auto}.stage{height:62vh}}
 
-body.list-mode{background:radial-gradient(60% 45% at 20% 25%,#9d7bff 0%,transparent 70%),radial-gradient(55% 45% at 85% 75%,#5aa7ff 0%,transparent 70%),linear-gradient(180deg,#3a2f7a,#1d2a63)}
+body.list-mode{background:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 33% 64%,#dfe8ff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 58% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 79% 45%,#cfe0ff 50%,transparent 51%),radial-gradient(1px 1px at 91% 84%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 44% 90%,#fff 50%,transparent 51%),radial-gradient(40% 35% at 18% 28%,rgba(124,92,255,.35),transparent 70%),radial-gradient(38% 32% at 84% 74%,rgba(56,140,255,.28),transparent 70%),radial-gradient(70% 60% at 50% 40%,#17123a 0%,#060818 70%,#02030a 100%);background-attachment:fixed}
 body.list-mode{color:#f2eaff}
 body.list-mode .sc i,body.list-mode .mut,body.list-mode th,body.list-mode .panel h2,body.list-mode .sc b{color:#f5f3ff;text-shadow:0 1px 2px rgba(10,15,40,.35)}
 body.list-mode .sc i,body.list-mode .mut,body.list-mode th{color:#e3e6ff}
@@ -176,7 +176,7 @@ body.light .hero{background:linear-gradient(120deg,#ffe3f0 0%,#e6ecff 55%,#dcf7e
   </aside>
 
   <section class="dash" id="cols" hidden></section>
-  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d" checked> Bật đồ họa 3D (tắt để xem dạng danh sách)</label></details>
+  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label></details>
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
@@ -579,7 +579,8 @@ function setMode3d(on){
 }
 g3d.onchange=()=>setMode3d(g3d.checked);
 let saved3d=null;try{saved3d=localStorage.getItem('vpd-3d')}catch(_){}
-if(saved3d==='0'){g3d.checked=false}
+const isPhone=(window.matchMedia&&matchMedia('(max-width:860px)').matches)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+g3d.checked=(saved3d==='1')||(saved3d===null&&isPhone);
 
 /* ---------- data ---------- */
 buildChips();
