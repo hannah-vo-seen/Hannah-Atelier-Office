@@ -218,6 +218,13 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .htrack{display:flex;height:12px;border-radius:99px;background:rgba(127,127,160,.15);overflow:hidden}
 .htrack i{display:block;height:100%}
 .hrow b{text-align:right}
+.kpi{position:relative;overflow:hidden;padding:16px 18px}
+.kpi::after{content:"";position:absolute;right:-22px;top:-22px;width:96px;height:96px;border-radius:50%;background:var(--kc);opacity:.35;pointer-events:none}
+.kpi.k1{--kc:#35d6a0}.kpi.k2{--kc:#8ea0c4}.kpi.k3{--kc:#ffb3d9}.kpi.k4{--kc:#b9a7ff}
+.kpi b{display:block;font:800 28px var(--f-d);line-height:1.1}
+.kpi.k3 b{font-size:19px;line-height:1.25}
+.kpi i{display:block;font-style:normal;font-size:13px;opacity:.85;margin-top:4px}
+.kpi small{display:block;font-size:12px;opacity:.65;margin-top:8px}
 </style>
 </head>
 <body>
@@ -623,8 +630,19 @@ function renderCols(){
   mkp('Tất cả',null);ORGS.forEach(o=>mkp(o.name,o.id,o.c));c.appendChild(pills);
   const cnt=k=>all.filter(a=>a.status===k).length;
   const st=document.createElement('div');st.className='stats4';
-  (()=>{const rdy=all.filter(a=>a.status==='ready').length;const pct=all.length?Math.round(rdy/all.length*100)+'%':'0%';const off=all.filter(a=>a.status==='idle'||a.status==='off').length;const big=ORGS.map(o=>({o,n:all.filter(a=>a.dept===o.id).length})).sort((x,y)=>y.n-x.n)[0];return [['Tỷ lệ sẵn sàng',pct],['Nghỉ / tắt',off],['Tổ chức lớn nhất',big?big.o.name:'—'],['Số tổ chức',ORGS.length]]})().forEach(([l,v])=>{
-    const d=document.createElement('div');d.className='sc';const b=document.createElement('b');b.textContent=v;const i=document.createElement('i');i.textContent=l;d.append(b,i);st.appendChild(d)});
+  const rdy=all.filter(a=>a.status==='ready').length;
+  const offN=all.filter(a=>a.status==='idle'||a.status==='off').length;
+  const pctOf=n=>all.length?Math.round(n/all.length*100):0;
+  const big=ORGS.map(o=>({o,n:all.filter(a=>a.dept===o.id).length})).sort((x,y)=>y.n-x.n)[0];
+  [['Tỷ lệ sẵn sàng',pctOf(rdy)+'%',rdy+' / '+all.length+' agent','k1'],
+   ['Nghỉ / tắt',offN,pctOf(offN)+'% tổng agent','k2'],
+   ['Tổ chức lớn nhất',big?big.o.name:'—',(big?big.n:0)+' agent','k3'],
+   ['Số tổ chức',ORGS.length,'đang theo dõi','k4']].forEach(([l,v,sub,k])=>{
+    const d=document.createElement('div');d.className='sc kpi '+k;
+    const b=document.createElement('b');b.textContent=v;
+    const i=document.createElement('i');i.textContent=l;
+    const sm=document.createElement('small');sm.textContent=sub;
+    d.append(b,i,sm);st.appendChild(d)});
   c.appendChild(st);
   const og=document.createElement('div');og.className='charts';og.hidden=!!listOrg;
   const BRK=[['ready','Sẵn sàng','#35d6a0'],['waiting','Đang chờ','#ffd25e'],['idle','Nghỉ','#8ea0c4'],['off','Tắt','#6b7896'],['planned','Chưa xây','#c4b5fd']];
