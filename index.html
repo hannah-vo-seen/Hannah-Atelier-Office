@@ -1235,9 +1235,13 @@ $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clear
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if(!t||!chatA||sending)return;
-  $('chatIn').value='';bubble(t,true);sending=true;$('chatNote').textContent='Agent đang trả lời...';
-  try{const d=await api('/chat',{message:t});bubble(d.answer,false);$('chatNote').textContent='';}
-  catch(err){$('chatNote').textContent='Lỗi: '+err.message;}
+  $('chatIn').value='';bubble(t,true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
+  try{
+    const d=await api('/chat',{message:t});bubble(d.answer,false);
+    $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ chị duyệt':'🔥 Xong';
+  }
+  catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
   finally{sending=false;}
 };
 </script>
