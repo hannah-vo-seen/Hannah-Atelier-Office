@@ -57,11 +57,11 @@ aside{background:var(--panel);border-radius:20px;padding:12px 14px;display:flex;
 .note{grid-column:1/-1;color:var(--mut);font-size:12.5px}
 @media(max-width:860px){.wrap{grid-template-columns:1fr;height:auto}.stage{height:62vh}}
 
-body.list-mode{background:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 33% 64%,#dfe8ff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 58% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 79% 45%,#cfe0ff 50%,transparent 51%),radial-gradient(1px 1px at 91% 84%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 44% 90%,#fff 50%,transparent 51%),radial-gradient(40% 35% at 18% 28%,rgba(124,92,255,.35),transparent 70%),radial-gradient(38% 32% at 84% 74%,rgba(56,140,255,.28),transparent 70%),radial-gradient(70% 60% at 50% 40%,#17123a 0%,#060818 70%,#02030a 100%);background-attachment:fixed}
-body.list-mode{color:#f2eaff}
+body.list-mode{background:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 33% 64%,#dfe8ff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 58% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 79% 45%,#cfe0ff 50%,transparent 51%),radial-gradient(1px 1px at 91% 84%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 44% 90%,#fff 50%,transparent 51%),#000;background-attachment:fixed}
+body.list-mode{color:#fff}
 body.list-mode::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(2px 2px at 6% 12%,#fff,transparent),radial-gradient(1.5px 1.5px at 14% 47%,#fff,transparent),radial-gradient(2px 2px at 22% 83%,#e6efff,transparent),radial-gradient(1.5px 1.5px at 31% 24%,#fff,transparent),radial-gradient(2.5px 2.5px at 38% 61%,#cfe2ff,transparent),radial-gradient(1.5px 1.5px at 46% 9%,#fff,transparent),radial-gradient(2px 2px at 53% 92%,#fff,transparent),radial-gradient(1.5px 1.5px at 61% 36%,#fff,transparent),radial-gradient(2px 2px at 68% 70%,#e6efff,transparent),radial-gradient(1.5px 1.5px at 74% 15%,#fff,transparent),radial-gradient(2.5px 2.5px at 81% 53%,#fff,transparent),radial-gradient(1.5px 1.5px at 88% 30%,#cfe2ff,transparent),radial-gradient(2px 2px at 94% 88%,#fff,transparent),radial-gradient(1.5px 1.5px at 3% 66%,#fff,transparent),radial-gradient(2px 2px at 26% 42%,#fff,transparent),radial-gradient(1.5px 1.5px at 57% 78%,#e6efff,transparent),radial-gradient(2px 2px at 97% 6%,#fff,transparent),radial-gradient(1.5px 1.5px at 42% 38%,#fff,transparent);opacity:.9}
 body.list-mode .sc i,body.list-mode .mut,body.list-mode th,body.list-mode .panel h2,body.list-mode .sc b{color:#f5f3ff;text-shadow:0 1px 2px rgba(10,15,40,.35)}
-body.list-mode .sc i,body.list-mode .mut,body.list-mode th{color:#e3e6ff}
+body.list-mode .sc i,body.list-mode .mut,body.list-mode th,body.list-mode td{color:#fff}
 body.list-mode .st.ready{color:#c9ffe9;background:rgba(53,214,160,.35)}
 body.list-mode .st.waiting{color:#fff3c4;background:rgba(255,210,94,.35)}
 body.list-mode .st.idle,body.list-mode .st.off,body.list-mode .st.planned{color:#e6e9ff;background:rgba(142,160,196,.35)}
@@ -140,6 +140,12 @@ body.light .hero{background:linear-gradient(120deg,#ffe3f0 0%,#e6ecff 55%,#dcf7e
 .hero p{margin:0;color:var(--mut);font-size:14px}
 .gbtn{border:0;border-radius:999px;padding:12px 22px;font:800 14px var(--f-d);color:#fff;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);box-shadow:0 10px 26px rgba(127,140,255,.35);cursor:pointer}
 .gbtn:hover{filter:brightness(1.05)}
+.hero{position:relative;overflow:hidden;min-height:150px}
+.hero>div,.hero>.gbtn{position:relative;z-index:1}
+.orb{position:absolute;right:-24px;top:-46px;width:min(300px,62vw);height:min(260px,52vw);pointer-events:none;z-index:0;border-radius:58% 42% 61% 39%/45% 55% 45% 55%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95) 0 4%,rgba(255,255,255,0) 15%),conic-gradient(from 210deg,#ff7ad9,#9b6bff,#5aa8ff,#ffa3e0,#ff7ad9);box-shadow:inset -18px -22px 40px rgba(20,8,60,.45),inset 14px 16px 30px rgba(255,255,255,.35),0 0 60px rgba(160,90,255,.55);opacity:.95;animation:morph 9s ease-in-out infinite}
+body.light .orb{box-shadow:inset -18px -22px 40px rgba(60,30,120,.25),inset 14px 16px 30px rgba(255,255,255,.5),0 0 50px rgba(160,120,255,.35)}
+@keyframes morph{0%,100%{border-radius:58% 42% 61% 39%/45% 55% 45% 55%}50%{border-radius:42% 58% 35% 65%/60% 40% 60% 40%}}
+@media(prefers-reduced-motion:reduce){.orb{animation:none}}
 </style>
 </head>
 <body>
@@ -535,6 +541,7 @@ function renderCols(){
   hero.innerHTML='<div><div class="eyebrow">Tổng quan văn phòng</div><h2>Hannah Atelier Office</h2><p>Theo dõi trạng thái '+all.length+' agent theo tổ chức và phòng ban.</p></div>';
   const gb=document.createElement('button');gb.className='gbtn';gb.textContent='Xem đồ họa 3D';
   gb.onclick=()=>{g3d.checked=true;setMode3d(true)};
+  hero.insertAdjacentHTML('afterbegin','<div class="orb" aria-hidden="true"></div>');
   hero.appendChild(gb);c.appendChild(hero);
   const pills=document.createElement('div');pills.className='pills';
   const mkp=(label,id)=>{const b=document.createElement('button');b.className='pill-f'+(listOrg===id?' on':'');b.textContent=label;b.onclick=()=>{listOrg=id;renderCols()};pills.appendChild(b)};
