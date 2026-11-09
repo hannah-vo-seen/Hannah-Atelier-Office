@@ -7,6 +7,7 @@
       "order": 1,
       "name": "Chief of Staff",
       "role": "Đầu mối duy nhất với Hannah; nhận việc, phân loại và điều phối các agent",
+      "greet": "Chị muốn giao việc gì? Em sẽ phân loại và chuyển đúng agent.",
       "status": "ready"
     },
     {
@@ -16,6 +17,7 @@
       "order": 2,
       "name": "Task Manager",
       "role": "Quản lý danh sách việc, deadline và tiến độ",
+      "greet": "Chị muốn xem việc nào, hay thêm việc mới ạ?",
       "status": "ready"
     },
     {
@@ -25,6 +27,7 @@
       "order": 3,
       "name": "Reminder",
       "role": "Nhắc việc theo lịch (8:00 và 22:00)",
+      "greet": "Chị muốn em nhắc việc gì, lúc mấy giờ ạ?",
       "status": "ready"
     },
     {
@@ -34,6 +37,7 @@
       "order": 4,
       "name": "Reporting",
       "role": "Tổng hợp báo cáo ngày, tuần, tháng",
+      "greet": "Chị cần báo cáo ngày, tuần hay tháng ạ?",
       "status": "ready"
     },
     {
@@ -43,6 +47,7 @@
       "order": 5,
       "name": "Quality Control",
       "role": "Kiểm tra chất lượng trước khi việc lên Chief of Staff",
+      "greet": "Chị gửi sản phẩm cần kiểm tra, em xem chất lượng cho chị.",
       "status": "ready"
     },
     {
@@ -52,6 +57,7 @@
       "order": 6,
       "name": "System Monitor",
       "role": "Theo dõi hệ thống và báo cáo cho Chief of Staff",
+      "greet": "Chị muốn hỏi tình trạng hệ thống nào ạ?",
       "status": "ready"
     },
     {
@@ -61,6 +67,7 @@
       "order": 7,
       "name": "Task Router",
       "role": "Xác định thương hiệu và kiểm tra quyền truy cập của việc",
+      "greet": "Chị gửi việc cần xác định thương hiệu, em sẽ điều hướng cho chị.",
       "status": "ready"
     },
     {
@@ -70,6 +77,7 @@
       "order": 1,
       "name": "Supervisor – Bách Quang",
       "role": "Giám sát Team Leader của Bách Quang, duyệt kế hoạch trong thương hiệu",
+      "greet": "Chị muốn xem kế hoạch nào của Bách Quang ạ?",
       "status": "planned"
     },
     {
@@ -79,6 +87,7 @@
       "order": 2,
       "name": "Team Leader – Bách Quang",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Bách Quang",
+      "greet": "Chị giao việc cho Bách Quang, em sẽ lập kế hoạch và chia việc.",
       "status": "planned"
     },
     {
@@ -88,6 +97,7 @@
       "order": 3,
       "name": "Content – Bách Quang",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
+      "greet": "Chị muốn em viết nội dung gì cho Bách Quang ạ?",
       "status": "planned"
     },
     {
@@ -97,6 +107,7 @@
       "order": 4,
       "name": "Ads – Bách Quang",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
+      "greet": "Chị hỏi về quảng cáo của Bách Quang, em đo lường cho chị.",
       "status": "planned"
     },
     {
@@ -106,6 +117,7 @@
       "order": 5,
       "name": "Product Research – Bách Quang",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
+      "greet": "Chị cần nghiên cứu sản phẩm nào của Bách Quang ạ?",
       "status": "planned"
     },
     {
@@ -115,6 +127,7 @@
       "order": 6,
       "name": "Market Research – Bách Quang",
       "role": "Nghiên cứu thị trường",
+      "greet": "Chị muốn em tìm hiểu thị trường nào cho Bách Quang?",
       "status": "planned"
     },
     {
@@ -124,6 +137,7 @@
       "order": 7,
       "name": "Trend & Event – Bách Quang",
       "role": "Theo dõi xu hướng và sự kiện",
+      "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Bách Quang?",
       "status": "planned"
     },
     {
@@ -133,6 +147,7 @@
       "order": 8,
       "name": "Creative & Design – Bách Quang",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
+      "greet": "Chị cần ý tưởng hay thiết kế gì cho Bách Quang ạ?",
       "status": "planned"
     },
     {
@@ -142,6 +157,7 @@
       "order": 1,
       "name": "Supervisor – Asia New Vision",
       "role": "Giám sát Team Leader của Asia New Vision, duyệt kế hoạch trong thương hiệu",
+      "greet": "Chị muốn xem kế hoạch nào của Asia New Vision ạ?",
       "status": "planned"
     },
     {
@@ -151,6 +167,7 @@
       "order": 2,
       "name": "Team Leader – Asia New Vision",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Asia New Vision",
+      "greet": "Chị giao việc cho Asia New Vision, em sẽ lập kế hoạch và chia việc.",
       "status": "planned"
     },
     {
@@ -160,6 +177,7 @@
       "order": 3,
       "name": "Content – Asia New Vision",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
+      "greet": "Chị muốn em viết nội dung gì cho Asia New Vision ạ?",
       "status": "planned"
     },
     {
@@ -169,6 +187,7 @@
       "order": 4,
       "name": "Ads – Asia New Vision",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
+      "greet": "Chị hỏi về quảng cáo của Asia New Vision, em đo lường cho chị.",
       "status": "planned"
     },
     {
@@ -178,6 +197,7 @@
       "order": 5,
       "name": "Product Research – Asia New Vision",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
+      "greet": "Chị cần nghiên cứu sản phẩm nào của Asia New Vision ạ?",
       "status": "planned"
     },
     {
@@ -187,6 +207,7 @@
       "order": 6,
       "name": "Market Research – Asia New Vision",
       "role": "Nghiên cứu thị trường",
+      "greet": "Chị muốn em tìm hiểu thị trường nào cho Asia New Vision?",
       "status": "planned"
     },
     {
@@ -196,6 +217,7 @@
       "order": 7,
       "name": "Trend & Event – Asia New Vision",
       "role": "Theo dõi xu hướng và sự kiện",
+      "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Asia New Vision?",
       "status": "planned"
     },
     {
@@ -205,6 +227,7 @@
       "order": 8,
       "name": "Creative & Design – Asia New Vision",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
+      "greet": "Chị cần ý tưởng hay thiết kế gì cho Asia New Vision ạ?",
       "status": "planned"
     },
     {
@@ -214,6 +237,7 @@
       "order": 1,
       "name": "Supervisor – Ember Lens",
       "role": "Giám sát Team Leader của Ember Lens, duyệt kế hoạch trong thương hiệu",
+      "greet": "Chị muốn xem kế hoạch nào của Ember Lens ạ?",
       "status": "planned"
     },
     {
@@ -223,6 +247,7 @@
       "order": 2,
       "name": "Team Leader – Ember Lens",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Ember Lens",
+      "greet": "Chị giao việc cho Ember Lens, em sẽ lập kế hoạch và chia việc.",
       "status": "planned"
     },
     {
@@ -232,6 +257,7 @@
       "order": 3,
       "name": "Content – Ember Lens",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
+      "greet": "Chị muốn em viết nội dung gì cho Ember Lens ạ?",
       "status": "planned"
     },
     {
@@ -241,6 +267,7 @@
       "order": 4,
       "name": "Ads – Ember Lens",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
+      "greet": "Chị hỏi về quảng cáo của Ember Lens, em đo lường cho chị.",
       "status": "planned"
     },
     {
@@ -250,6 +277,7 @@
       "order": 5,
       "name": "Product Research – Ember Lens",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
+      "greet": "Chị cần nghiên cứu sản phẩm nào của Ember Lens ạ?",
       "status": "planned"
     },
     {
@@ -259,6 +287,7 @@
       "order": 6,
       "name": "Market Research – Ember Lens",
       "role": "Nghiên cứu thị trường",
+      "greet": "Chị muốn em tìm hiểu thị trường nào cho Ember Lens?",
       "status": "planned"
     },
     {
@@ -268,6 +297,7 @@
       "order": 7,
       "name": "Trend & Event – Ember Lens",
       "role": "Theo dõi xu hướng và sự kiện",
+      "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Ember Lens?",
       "status": "planned"
     },
     {
@@ -277,6 +307,7 @@
       "order": 8,
       "name": "Creative & Design – Ember Lens",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
+      "greet": "Chị cần ý tưởng hay thiết kế gì cho Ember Lens ạ?",
       "status": "planned"
     }
   ],
