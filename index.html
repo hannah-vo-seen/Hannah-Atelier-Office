@@ -260,6 +260,13 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #mascot{position:absolute;right:16px;bottom:72px;width:64px;height:64px;object-fit:contain;animation:bob 3s ease-in-out infinite;pointer-events:none;z-index:3;filter:drop-shadow(0 8px 14px rgba(120,100,220,.35))}
 #mascot[hidden]{display:none!important}
 @media(max-width:1000px){.dgrid{grid-template-columns:1fr}.rings{grid-template-columns:repeat(2,1fr)}.sphere{min-height:300px}.planet{width:260px;height:260px}.sphere{min-height:380px}}
+.dcard table thead th{position:sticky;top:0;background:var(--card);z-index:1}
+.dcard table td{padding:9px 8px}
+#chatInfo{padding:12px 14px;border-bottom:1px dashed rgba(150,130,220,.4);font-size:13px;color:#2b2f45;background:rgba(255,255,255,.65)}
+#chatInfo[hidden]{display:none!important}
+#chatInfo .ir{margin:6px 0}
+#chatInfo .ir b{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
+#chat header .ava{cursor:pointer}
 </style>
 </head>
 <body>
@@ -302,17 +309,17 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" src="planet.png" alt=""><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div id="chatInfo" hidden></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {RoundedBoxGeometry} from './RoundedBoxGeometry.js';
 
 const ORGS=[
-  {id:'cmd',name:'Atelier Command',c:'#8fb3ff'},
-  {id:'bq',name:'Bách Quang',c:'#ff7ab0'},
-  {id:'mka',name:'Asia New Vision',c:'#6ea8ff'},
-  {id:'el',name:'Ember Lens',c:'#ffb36b'}
+  {id:'cmd',name:'Atelier Command',c:'#8fb3ff',t:'#3b64c9'},
+  {id:'bq',name:'Bách Quang',c:'#ff7ab0',t:'#d43f7f'},
+  {id:'mka',name:'Asia New Vision',c:'#6ea8ff',t:'#2f6fd6'},
+  {id:'el',name:'Ember Lens',c:'#ffb36b',t:'#c46a1f'}
 ];
 const SUBS=['Điều hành','Giám sát','Điều phối','Chuyên môn'];
 const LABEL={ready:'Sẵn sàng',waiting:'Đang chờ',idle:'Rảnh',off:'Nghỉ',planned:'Chưa xây'};
@@ -736,11 +743,16 @@ function renderCols(){
   c.appendChild(rings);
   const tp=ce('div','dcard');tp.style.marginTop='16px';
   tp.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));
+  const tpills=ce('div','pills');
+  const mk2=(label,id,col)=>{const b=ce('button','pill-f'+(listOrg===id?' on':'')+(id?'':' all'),label);if(col)b.style.setProperty('--c',col);b.onclick=()=>{listOrg=id;renderCols()};tpills.appendChild(b)};
+  mk2('Tất cả',null);ORGS.forEach(o=>mk2(o.name,o.id,o.c));
+  tp.appendChild(tpills);
+  tp.style.maxHeight='460px';tp.style.overflow='auto';
   const tb=ce('table');
   tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Cấp</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
   scoped.slice().sort((x,y)=>ORGS.findIndex(o=>o.id===x.dept)-ORGS.findIndex(o=>o.id===y.dept)||(x.order||0)-(y.order||0)).forEach(a=>{
-    const o=ORGS.find(z=>z.id===a.dept),tr=ce('tr');tr.style.cursor='pointer';tr.onclick=()=>openChat(a);
+    const o=ORGS.find(z=>z.id===a.dept),tr=ce('tr');tr.style.cursor='pointer';if(o)tr.style.color=o.t;tr.onclick=()=>openChat(a);
     [a.name,o?o.name:'',a.sub||'—'].forEach(t=>tr.appendChild(ce('td',null,t)));
     const td=ce('td');td.appendChild(ce('span','st '+(a.status||'off'),LABEL[a.status]||''));tr.appendChild(td);body.appendChild(tr);
   });
@@ -790,7 +802,7 @@ async function api(path,payload){
 function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
-  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Chào chị! Nhắn gì cho '+chatA.name+' nhé.';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
+  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah!';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
@@ -802,6 +814,7 @@ function openChat(a){
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
 }
 let sending=false;
+$('chatAva').onclick=()=>{const box=$('chatInfo');if(!box.hidden){box.hidden=true;return;}if(!chatA)return;box.textContent='';const o=ORGS.find(z=>z.id===chatA.dept);[['Nhiệm vụ chính',chatA.role||'—'],['Cấp',chatA.sub||'—'],['Tổ chức',o?o.name:'—'],['Trạng thái',LABEL[chatA.status]||'—']].forEach(([k,v])=>{const r=document.createElement('div');r.className='ir';const b=document.createElement('b');b.textContent=k;const sp=document.createElement('span');sp.textContent=v;r.append(b,sp);box.appendChild(r)});box.hidden=false;};
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
