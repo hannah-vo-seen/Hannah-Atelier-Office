@@ -173,6 +173,15 @@ body .oc.brk .sub2{color:var(--mut)}
 #chat form{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.15)}
 #chat input{flex:1;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;padding:9px 14px;font:14px var(--f)}
 #chat form button{border:0;border-radius:999px;padding:0 16px;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);color:#fff;font:800 13px var(--f-d);cursor:pointer}
+#passModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
+#passModal[hidden]{display:none!important}
+#passModal .pm{background:#15131f;color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:20px;width:min(340px,100%);box-sizing:border-box}
+#passModal h3{margin:0 0 6px;font:800 18px var(--f-d)}
+#passModal p{margin:0 0 12px;font-size:13px;opacity:.8}
+#passModal input{width:100%;box-sizing:border-box;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;padding:9px 14px;font:14px var(--f)}
+.pmb{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.pmb button{border:0;border-radius:999px;padding:8px 16px;font:800 13px var(--f-d);cursor:pointer;color:#fff;background:linear-gradient(90deg,#ff8fc0,#7fb2ff)}
+#pmSkip{background:rgba(255,255,255,.15)!important}
 </style>
 </head>
 <body>
@@ -214,6 +223,7 @@ body .oc.brk .sub2{color:var(--mut)}
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
+<div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
 <div id="chat" hidden><header><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
@@ -642,6 +652,11 @@ let pass='';try{pass=sessionStorage.getItem('vpd-pass')||''}catch(_){}
 function setPass(v){pass=(v||'').trim();try{sessionStorage.setItem('vpd-pass',pass)}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
 $('passSave').onclick=()=>setPass($('pass').value);
 setPass(pass);
+function closePM(){$('passModal').hidden=true;}
+$('pmOk').onclick=()=>{const v=$('pmIn').value.trim();if(v){setPass(v);closePM();$('pmIn').value='';}};
+$('pmIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pmOk').click();});
+$('pmSkip').onclick=closePM;
+if(!pass)$('passModal').hidden=false;
 let chatA=null,chatTimer=null;
 async function api(path,payload){
   const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,pass,agent:chatA.id})});
@@ -657,7 +672,7 @@ async function loadHist(){
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
   clearInterval(chatTimer);
-  if(!pass){const p=window.prompt('Nhập mật khẩu chat');if(p&&p.trim())setPass(p);}
+  if(!pass){$('passModal').hidden=false;}
   if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
   $('chatForm').hidden=false;
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
