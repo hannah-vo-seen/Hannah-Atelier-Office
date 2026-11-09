@@ -359,6 +359,15 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .bitem small{display:block;opacity:.7;margin-top:3px;font-size:12px}
 @media(max-width:1000px){.ostrip{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}}
+#chat header #chatTitle{flex:1;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+#chat header #chatClose{flex:none;white-space:nowrap;margin-left:8px}
+.heads .tav{overflow:visible}
+.hx{position:absolute;left:-5px;top:-5px;width:19px;height:19px;border-radius:50%;background:#fff;color:#55607a;border:1px solid #d6dbe8;font:700 13px/17px var(--f);font-style:normal;text-align:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.18);z-index:2}
+.attach{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;cursor:pointer;color:#8a6fd6;background:rgba(255,255,255,.8);flex:none;box-shadow:0 2px 8px rgba(150,120,255,.2)}
+@media(max-width:640px){
+  .tbl-card{max-height:none!important;overflow:visible!important}
+  .tbl-card .tphead{position:static}
+}
 </style>
 </head>
 <body>
@@ -401,7 +410,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" hidden></label><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
@@ -897,7 +906,7 @@ function renderCols(){
   });
   c.appendChild(rings);
   const tb0=ce('div');
-  const tp=ce('div','dcard');tp.style.marginTop='16px';
+  const tp=ce('div','dcard tbl-card');tp.style.marginTop='16px';
   const tph=ce('div','tphead');tph.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));tp.appendChild(tph);
   const tpills=ce('div','pills');
   const mk2=(label,id,col)=>{const b=ce('button','pill-f'+(listOrg===id?' on':'')+(id?'':' all'),label);if(col)b.style.setProperty('--c',col);b.onclick=()=>{listOrg=id;renderCols()};tpills.appendChild(b)};
@@ -973,8 +982,14 @@ function renderThreads(){
     b.style.setProperty('--c',o?o.c:'#8fb3ff');b.textContent=initials(a.name).toUpperCase();
     const n=on?0:unread(id);
     if(n>0){const i=document.createElement('i');i.className='unr';i.textContent=n>9?'9+':String(n);b.appendChild(i);}
+    const hx=document.createElement('i');hx.className='hx';hx.textContent='×';hx.title='Bỏ khỏi danh sách';hx.onclick=e=>{e.stopPropagation();dropThread(id);};b.appendChild(hx);
     b.onclick=()=>openChat(a);box.appendChild(b);
   });
+}
+function dropThread(id){
+  threads=threads.filter(x=>x!==id);delete seen[id];delete known[id];saveThreads();
+  if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);}
+  renderThreads();
 }
 async function pollThreads(){
   if(!pass)return;
@@ -997,6 +1012,7 @@ async function loadHist(){
   $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! '+((chatA&&chatA.greet)||('Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.'));h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
+  if(infoAgent){infoAgent=null;renderCols();}
   chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
   clearInterval(chatTimer);
   if(!pass){$('passModal').hidden=false;}
@@ -1008,6 +1024,7 @@ function openChat(a){
 }
 let sending=false;
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
+$('chatFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)$('chatNote').textContent='Đã chọn file: '+f.name+' (gửi file cần cập nhật Worker)';e.target.value='';};
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
