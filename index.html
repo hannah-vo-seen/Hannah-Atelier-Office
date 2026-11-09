@@ -268,13 +268,30 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatInfo .ir b{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 #chat header .ava{cursor:pointer}
 .sphere{min-height:480px;padding:0}
-.planetbox{position:absolute;inset:0;z-index:0}
+.planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
+.planetbox .bubble{width:min(300px,62%);height:auto;aspect-ratio:1;object-fit:contain;animation:spinb 28s linear infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
+@keyframes spinb{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.planetbox .bubble{animation:none}}
 .planetbox canvas{width:100%;height:100%;display:block}
 .pin{z-index:2;font-size:14px;padding:10px 16px 10px 13px;gap:8px}
 .pin::before{width:12px;height:12px}
 .pin b{font:800 16px var(--f-d)}
+.pin.sm{font-size:11px;padding:6px 9px 6px 8px;gap:5px}
+.pin.sm::before{width:8px;height:8px}
+.pin.sm b{font-size:13px}
 .dgrid{grid-template-columns:240px 1fr}
 .ostrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.dhead .ostrip{flex:1 1 560px;min-width:0;margin-top:0}
+.tphead{position:sticky;top:0;z-index:3;margin:-16px -16px 0;padding:16px 16px 10px;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:22px 22px 0 0}
+.tphead .ct{margin-bottom:10px}
+.ainfo{margin-top:12px;border-radius:18px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);box-shadow:0 8px 24px rgba(120,100,200,.12)}
+.ah{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ah b{font:800 15px var(--f-d)}
+.ax{border:0;background:none;color:#8a6fd6;font:700 12px var(--f);cursor:pointer}
+.ag{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ai small{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6;margin-bottom:3px}
+.ai span{font-size:13px;line-height:1.4}
+@media(max-width:640px){.ag{grid-template-columns:1fr 1fr}}
 .ostrip.one{grid-template-columns:1fr}
 .ocard{border-radius:20px;padding:14px 16px;background:var(--card);border:1px solid var(--line);cursor:pointer;border-top:4px solid var(--c)}
 .ocard.on{box-shadow:0 0 0 2px var(--c)}
@@ -334,7 +351,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div id="chatInfo" hidden></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
@@ -699,7 +716,26 @@ function ringBox(parts,size,sw,center){
 }
 function legendRow(label,v,col){const r=ce('div','lgr');const i=ce('i');i.style.background=col;r.append(i,ce('span',null,label),ce('b',null,String(v)));return r;}
 const PINS=[['20%','28%'],['80%','28%'],['20%','74%'],['80%','74%']];
-let planetR=null,planetScene=null,planetCam=null,planetGroup=null,planetHost=null;
+let planetR=null,planetScene=null,planetCam=null,planetGroup=null,planetHost=null,planetBall=null;
+function globeTex(col){
+  const cv=document.createElement('canvas');cv.width=1024;cv.height=512;const x=cv.getContext('2d');
+  const g=x.createLinearGradient(0,0,1024,512);
+  if(col){g.addColorStop(0,col);g.addColorStop(1,'#ffffff');}
+  else{g.addColorStop(0,'#c9b8ff');g.addColorStop(.5,'#ffb3d9');g.addColorStop(1,'#9fd8ff');}
+  x.fillStyle=g;x.fillRect(0,0,1024,512);
+  x.fillStyle='rgba(255,255,255,.6)';
+  for(let la=-80;la<=80;la+=6)for(let lo=0;lo<360;lo+=6){
+    const px=lo/360*1024,py=(90-la)/180*512;
+    x.beginPath();x.arc(px,py,2.6,0,Math.PI*2);x.fill();
+  }
+  const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;
+}
+function setGlobe(col){
+  if(!planetBall)return;
+  const old=planetBall.material.map;
+  planetBall.material.map=globeTex(col);planetBall.material.needsUpdate=true;
+  if(old)old.dispose();
+}
 function initPlanet(){
   if(planetR)return;
   planetR=new THREE.WebGLRenderer({antialias:true,alpha:true});
@@ -712,22 +748,22 @@ function initPlanet(){
   const p1=new THREE.PointLight(0xff9ad5,3,20);p1.position.set(-3,-1.5,3);planetScene.add(p1);
   const p2=new THREE.PointLight(0x8fc4ff,3,20);p2.position.set(3,2,2.5);planetScene.add(p2);
   planetGroup=new THREE.Group();planetGroup.rotation.z=.35;planetScene.add(planetGroup);
-  const ball=new THREE.Mesh(new THREE.SphereGeometry(1.1,64,48),new THREE.MeshPhysicalMaterial({color:0xf1ecff,roughness:.08,metalness:0,iridescence:1,iridescenceIOR:1.35,iridescenceThicknessRange:[250,650],clearcoat:1,clearcoatRoughness:.05}));
-  planetGroup.add(ball);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.78,.075,24,180),new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.12,iridescence:1,iridescenceIOR:1.5,clearcoat:1,transparent:true,opacity:.9}));
-  ring.rotation.x=Math.PI/2.5;planetGroup.add(ring);
+  planetBall=new THREE.Mesh(new THREE.SphereGeometry(1.1,64,48),new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.35,metalness:0,clearcoat:.6,clearcoatRoughness:.2}));
+  planetGroup.add(planetBall);
+  setGlobe(null);
   const loop=()=>{
     requestAnimationFrame(loop);
     if(!planetHost||!planetHost.isConnected)return;
     const w=planetHost.clientWidth,h=planetHost.clientHeight;if(!w||!h)return;
     const pr=planetR.getPixelRatio();
-    if(planetR.domElement.width!==Math.round(w*pr)||planetR.domElement.height!==Math.round(h*pr)){planetR.setSize(w,h,false);planetCam.aspect=w/h;planetCam.updateProjectionMatrix();}
+    if(planetR.domElement.width!==Math.round(w*pr)||planetR.domElement.height!==Math.round(h*pr)){planetR.setSize(w,h,false);planetCam.aspect=w/h;planetCam.position.z=w<520?8.2:5.6;planetCam.updateProjectionMatrix();}
     planetGroup.rotation.y+=.005;
     planetR.render(planetScene,planetCam);
   };
   loop();
 }
 function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);}
+let infoAgent=null;
 function renderCols(){
   const c=$('cols');c.textContent='';
   const all=state.agents,tasks=state.tasks||[];
@@ -758,11 +794,17 @@ function renderCols(){
   L.appendChild(tc);
 
   const M=ce('div','dcard sphere');
-  const host=ce('div','planetbox');M.appendChild(host);mountPlanet(host);
+  const host=ce('div','planetbox');M.appendChild(host);
+  const bo=listOrg?ORGS.find(o=>o.id===listOrg):null;
+  host.style.setProperty('--gc',bo?bo.c+'bb':'rgba(200,170,255,.55)');
+  const bub=ce('img','bubble');bub.src='planet.png';bub.alt='';bub.draggable=false;host.appendChild(bub);
   ORGS.forEach((o,i)=>{
     const n=all.filter(a=>a.dept===o.id).length;
     const p=ce('button','pin'+(listOrg===o.id?' on':''));p.style.setProperty('--c',o.c);
-    p.style.left=PINS[i][0];p.style.top=PINS[i][1];p.title=o.name;
+    const nar=window.innerWidth<640;
+    const pos=nar?[['27%','22%'],['73%','22%'],['27%','80%'],['73%','80%']][i]:PINS[i];
+    p.style.left=pos[0];p.style.top=pos[1];p.title=o.name;
+    if(nar)p.classList.add('sm');
     p.append(ce('b',null,String(n)),ce('span',null,o.name));
     p.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     M.appendChild(p);
@@ -783,7 +825,7 @@ function renderCols(){
     card.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     strip.appendChild(card);
   });
-  c.appendChild(strip);
+  hd.insertBefore(strip,gb);
 
   if(org){
     const bd=ce('div','board');
@@ -809,11 +851,19 @@ function renderCols(){
   c.appendChild(rings);
   const tb0=ce('div');
   const tp=ce('div','dcard');tp.style.marginTop='16px';
-  tp.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));
+  const tph=ce('div','tphead');tph.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));tp.appendChild(tph);
   const tpills=ce('div','pills');
   const mk2=(label,id,col)=>{const b=ce('button','pill-f'+(listOrg===id?' on':'')+(id?'':' all'),label);if(col)b.style.setProperty('--c',col);b.onclick=()=>{listOrg=id;renderCols()};tpills.appendChild(b)};
   mk2('Tất cả',null);ORGS.forEach(o=>mk2(o.name,o.id,o.c));
-  tp.appendChild(tpills);
+  tph.appendChild(tpills);
+  if(infoAgent){
+    const ia=infoAgent,io=ORGS.find(z=>z.id===ia.dept);
+    const bx=ce('div','ainfo');bx.style.setProperty('--c',io?io.c:'#8fb3ff');
+    const ah=ce('div','ah');const xb=ce('button','ax','Đóng');xb.onclick=()=>{infoAgent=null;renderCols()};ah.append(ce('b',null,ia.name),xb);
+    const ag=ce('div','ag');
+    [['Nhiệm vụ chính',ia.role||'—'],['Cấp',ia.sub||'—'],['Tổ chức',io?io.name:'—'],['Trạng thái',LABEL[ia.status]||'—']].forEach(([k,v])=>{const r=ce('div','ai');r.append(ce('small',null,k),ce('span',null,v));ag.appendChild(r);});
+    bx.append(ah,ag);tp.appendChild(bx);
+  }
   tp.style.maxHeight='460px';tp.style.overflow='auto';
   const tb=ce('table');
   tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Cấp</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
@@ -869,7 +919,7 @@ async function api(path,payload){
 function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
-  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah!';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
+  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
@@ -881,7 +931,7 @@ function openChat(a){
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
 }
 let sending=false;
-$('chatAva').onclick=()=>{const box=$('chatInfo');if(!box.hidden){box.hidden=true;return;}if(!chatA)return;box.textContent='';const o=ORGS.find(z=>z.id===chatA.dept);[['Nhiệm vụ chính',chatA.role||'—'],['Cấp',chatA.sub||'—'],['Tổ chức',o?o.name:'—'],['Trạng thái',LABEL[chatA.status]||'—']].forEach(([k,v])=>{const r=document.createElement('div');r.className='ir';const b=document.createElement('b');b.textContent=k;const sp=document.createElement('span');sp.textContent=v;r.append(b,sp);box.appendChild(r)});box.hidden=false;};
+$('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
