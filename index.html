@@ -75,6 +75,12 @@ body.list-mode .wrap{max-width:1280px;margin:0 auto}
 .settings{margin-top:14px;color:var(--mut);font-size:13px}
 .settings summary{cursor:pointer;font:700 14px var(--f-d)}
 .settings label{display:block;margin-top:8px;color:var(--ink)}
+.settings label.sw{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px}
+.settings label.sw input{appearance:none;-webkit-appearance:none;width:28px;height:15px;border-radius:9px;background:#ffffff33;position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
+.settings label.sw input::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .2s}
+.settings label.sw input:checked{background:#7aa7ff}
+.settings label.sw input:checked::after{left:15px}
+.settings label.sw input:disabled{opacity:.4;cursor:default}
 @media(max-width:860px){.glassrow{grid-template-columns:1fr}}
 [hidden]{display:none!important}
 #cols{grid-column:1/-1}
@@ -479,7 +485,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
       <h1><span>Hannah</span> <span class="gx">Atelier Office</span></h1>
       <div class="sub">Văn phòng agent · giờ Việt Nam <span id="clock">--:--:--</span></div>
     </div>
-    <button id="tb" class="btn" style="position:static">☾ Tối</button>
+    <button id="tb" class="btn" style="position:static;display:none" hidden>☾ Tối</button>
     <div class="stats">
       <div class="stat"><b id="sAll">–</b><i>Agent</i></div>
       <div class="stat"><b id="sRd">–</b><i>Sẵn sàng</i></div>
@@ -511,7 +517,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
-<details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
+<details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
 <div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" hidden></label><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
@@ -841,7 +847,21 @@ function setTheme(light){
 }
 tb.onclick=()=>setTheme(!document.body.classList.contains('light'));
 let saved=null;try{saved=localStorage.getItem('vpd-theme')}catch(_){}
-setTheme(saved?saved==='light':matchMedia('(prefers-color-scheme: light)').matches);
+/* Sáng/tối: tự đổi theo giờ Việt Nam (6:00-17:59 sáng), hoặc chọn tay khi tắt tự đổi */
+const thAutoEl=document.getElementById('thAuto'),thLightEl=document.getElementById('thLight');
+function themeByClock(){const h=Number(new Intl.DateTimeFormat('en-GB',{hour:'numeric',hour12:false,timeZone:'Asia/Saigon'}).format(new Date()));return h>=6&&h<18;}
+function applyTheme(save){
+  const auto=thAutoEl.checked;
+  thLightEl.disabled=auto;
+  setTheme(auto?themeByClock():thLightEl.checked);
+  if(save){try{localStorage.setItem('vpd-th-auto',auto?'1':'0');localStorage.setItem('vpd-th-light',thLightEl.checked?'1':'0')}catch(_){}}
+}
+let thStored={auto:'1',light:'0'};try{thStored={auto:localStorage.getItem('vpd-th-auto')||'1',light:localStorage.getItem('vpd-th-light')||'0'}}catch(_){}
+thAutoEl.checked=thStored.auto!=='0';thLightEl.checked=thStored.light==='1';
+thAutoEl.addEventListener('change',()=>applyTheme(true));
+thLightEl.addEventListener('change',()=>applyTheme(true));
+applyTheme(false);
+setInterval(()=>{if(thAutoEl.checked)applyTheme(false)},60000);
 
 /* ---------- size, loop, clock ---------- */
 function resize(){
