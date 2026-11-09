@@ -383,8 +383,10 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
   .stat{flex:none!important;min-width:0!important;padding:8px 6px!important;border-radius:12px!important}
   .stat b{font-size:17px}
   .stat i{font-size:11px}
-  .tbl-card:not(.closed){max-height:420px!important;overflow:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .tbl-card:not(.closed) .tphead{position:sticky!important;top:0}
+  .tbl-card:not(.closed){max-height:none!important;overflow:visible!important}
+  .tbl-card .tlist{max-height:none}
+  .tbl-card:not(.closed) .tlist{max-height:420px;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .tbl-card:not(.closed) .tphead{position:static!important}
 }
 
 .planetbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
@@ -394,7 +396,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .gcard h4{font:800 20px var(--f-d);margin:0;padding-right:22px}
 .gcard p{margin:8px 0 0;font-size:13px;line-height:1.5;opacity:.85}
 .gcard .gx{position:absolute;top:8px;right:10px;border:0;background:none;color:inherit;cursor:pointer;font-size:16px;opacity:.7}
-@media(max-width:640px){.hud,.cnr{display:none}.planetbox canvas{height:260px;bottom:auto}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
+@media(max-width:640px){.gcard.l{display:none}.gcard.r{transform:none;top:auto}.hud,.cnr{display:none}.dcard.sphere .pin{font-size:11px;padding:3px 9px 3px 3px;gap:6px}.dcard.sphere .pin b{width:22px;height:22px;font-size:11px}.dcard.sphere .pin span{font-size:11px}.planetbox canvas{height:260px;bottom:auto}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
 
 .dcard.sphere{background:radial-gradient(circle at 50% 42%,#2a1450 0%,#0e0820 58%,#06040d 100%);color:#f4f0ff;border-color:rgba(176,107,255,.45);box-shadow:inset 0 0 0 1px rgba(176,107,255,.25),0 0 40px -10px rgba(155,77,255,.7)}
 .gridbg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(176,107,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(176,107,255,.09) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);pointer-events:none}
@@ -414,6 +416,19 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .gcard .gtag i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--c,#c59bff);box-shadow:0 0 8px var(--c,#c59bff);margin-right:7px;vertical-align:1px}
 .gcard p{color:#d8cdf2}
 .gcard .gx{color:#f4f0ff}
+.gcard.r{right:18px;top:50%;bottom:auto;transform:translateY(-50%)}
+.gcard.l{left:18px;top:50%;right:auto;bottom:auto;width:min(230px,30%);transform:translateY(-50%);background:linear-gradient(160deg,rgba(40,22,80,.72),rgba(10,6,22,.78));border:1px solid rgba(197,155,255,.4);border-top:2px solid var(--c,#c59bff);color:#f4f0ff}
+.gcard.l .grow{display:flex;gap:8px;margin-top:12px}
+.gcard.l .gcell{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px}
+.gcard.l .gcell small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#bfb0e0}
+.gcard.l .gcell b{font:800 18px Inter;display:block;margin-top:3px}
+.gcard.l h4{font:800 18px var(--f-d);margin:0}
+@media(min-width:641px){.tbl-card .tlist{max-height:460px;overflow:auto}}
+.dcard.sphere .pin{transform:translate(12px,-50%);padding:3px 10px 3px 8px;gap:6px;font-size:11px;border-radius:999px;background:rgba(12,8,26,.7)}
+.dcard.sphere .pin b{display:none}
+.dcard.sphere .pin span{font-size:11px;font-weight:600}
+.dcard.sphere .pin::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
+@media(max-width:640px){.dcard.sphere .pin{padding:2px 8px 2px 7px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -878,19 +893,27 @@ function globeTick(){
   const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
   if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
   const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
-  const cx=w*(GL.shift&&w>640?0.36:0.5),cy=h/2,R=Math.min(w,h)*0.36;
+  const ph=w<=640;const cx=w*0.5,cy=h/2,R=Math.min(w,h)*(ph?0.4:0.36);
   const P=(la,lo)=>{la*=Math.PI/180;lo=lo*Math.PI/180+rot;return{x:cx+Math.cos(la)*Math.sin(lo)*R,y:cy-Math.sin(la)*R,z:Math.cos(la)*Math.cos(lo)};};
   const g=x.createRadialGradient(cx-R*.35,cy-R*.4,R*.1,cx,cy,R);
   g.addColorStop(0,'#6a3fc7');g.addColorStop(.7,'#2a1656');g.addColorStop(1,'#120828');
   x.beginPath();x.arc(cx,cy,R,0,Math.PI*2);x.fillStyle=g;x.shadowColor='#9b4dff';x.shadowBlur=50;x.fill();x.shadowBlur=0;
-  for(let la=-75;la<=75;la+=10)for(let lo=-180;lo<180;lo+=8){const p=P(la,lo);if(p.z<=0.02)continue;
-    x.beginPath();x.arc(p.x,p.y,1.2*(0.4+0.6*p.z),0,Math.PI*2);x.fillStyle='rgba(220,200,255,'+(0.15+0.5*p.z)+')';x.fill();}
+  const ag=x.createRadialGradient(cx,cy,R*0.9,cx,cy,R*1.22);ag.addColorStop(0,'rgba(170,120,255,.45)');ag.addColorStop(1,'rgba(170,120,255,0)');
+  x.beginPath();x.arc(cx,cy,R*1.22,0,Math.PI*2);x.fillStyle=ag;x.fill();
+  for(let la=-78;la<=78;la+=6)for(let lo=-180;lo<180;lo+=6){const p=P(la,lo);if(p.z<=0.02)continue;
+    const land=Math.sin(lo*0.061+la*0.11)+Math.cos(la*0.17-lo*0.043)>0.55;
+    x.beginPath();x.arc(p.x,p.y,(land?1.9:1.1)*(0.45+0.55*p.z),0,Math.PI*2);
+    x.fillStyle=land?'rgba(236,220,255,'+(0.35+0.6*p.z)+')':'rgba(170,140,230,'+(0.12+0.3*p.z)+')';x.fill();}
+  // anchor dots on the surface
+  Object.keys(GPOS).forEach(id=>{const o=GPOS[id];const p=P(o[0],o[1]);if(p.z<=0.02)return;const oc=ORGS.find(z=>z.id===id);const col=oc?oc.c:'#fff';
+    x.beginPath();x.arc(p.x,p.y,7,0,Math.PI*2);x.fillStyle=col+'33';x.fill();
+    x.beginPath();x.arc(p.x,p.y,3.2,0,Math.PI*2);x.fillStyle=col;x.shadowColor=col;x.shadowBlur=12;x.fill();x.shadowBlur=0;});
   x.beginPath();x.arc(cx,cy,R,0,Math.PI*2);x.strokeStyle='#c59bff';x.lineWidth=1.5;x.shadowColor='#c59bff';x.shadowBlur=18;x.stroke();x.shadowBlur=0;
   x.beginPath();x.arc(cx,cy,R+12,0,Math.PI*2);x.strokeStyle='rgba(197,155,255,.35)';x.lineWidth=1;x.setLineDash([2,5]);x.stroke();x.setLineDash([]);
   for(let i=0;i<120;i++){const a=i/120*Math.PI*2+rot*0.5,L=i%10===0?9:4;x.beginPath();x.moveTo(cx+Math.cos(a)*(R+18),cy+Math.sin(a)*(R+18));x.lineTo(cx+Math.cos(a)*(R+18+L),cy+Math.sin(a)*(R+18+L));x.strokeStyle='rgba(197,155,255,'+(i%10===0?.7:.3)+')';x.lineWidth=1;x.stroke();}
   GL.pinEls.forEach(el=>{const o=GPOS[el.dataset.org];const p=P(o[0],o[1]);
     if(p.z<=0){el.style.display='none';return;}
-    el.style.display='';el.style.left=p.x+'px';el.style.top=p.y+'px';el.style.zIndex=Math.round(p.z*10)+2;});
+    el.style.display='';el.style.left=p.x+'px';el.style.top=p.y+'px';el.style.zIndex=Math.round(p.z*10)+2;el.style.transform=p.x>w*0.55?'translate(calc(-100% - 12px),-50%)':'';});
 }
 function renderCols(){
   const c=$('cols');
@@ -943,13 +966,25 @@ function renderCols(){
     p.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     M.appendChild(p);pinEls.push(p);
   });
-  if(bo){
-    const sup=all.find(a=>a.dept===bo.id&&a.sub==='Giám sát');
-    const ln=all.filter(a=>a.dept===bo.id),rd2=ln.filter(a=>a.status==='ready').length;
-    const gc=ce('div','gcard');gc.style.setProperty('--c',bo.c);const gx=ce('button','gx','✕');gx.type='button';gx.title='Đóng';gx.onclick=()=>{listOrg=null;renderCols()};
-    const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode('Thương hiệu · '+ln.length+' agent'));
-    gc.append(gx,tg,ce('h4',null,bo.name),ce('p',null,rd2+' sẵn sàng'),ce('p',null,sup?sup.role:''));
-    M.appendChild(gc);
+  {
+    const sup=bo?all.find(a=>a.dept===bo.id&&a.sub==='Giám sát'):null;
+    const ln=bo?all.filter(a=>a.dept===bo.id):all;
+    const rd2=ln.filter(a=>a.status==='ready').length;
+    const gr=ce('div','gcard r');
+    if(bo){
+      gr.style.setProperty('--c',bo.c);const gx=ce('button','gx','✕');gx.type='button';gx.title='Đóng';gx.onclick=()=>{listOrg=null;renderCols()};
+      const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode('Thương hiệu · '+ln.length+' agent'));
+      gr.append(gx,tg,ce('h4',null,bo.name),ce('p',null,rd2+' sẵn sàng'),ce('p',null,sup?sup.role:''));
+    }else{
+      const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode('Chọn thương hiệu'));
+      gr.append(tg,ce('h4',null,'Bấm một brand'),ce('p',null,'Bấm ghim trên quả địa cầu để xem thương hiệu đó.'));
+    }
+    const gl=ce('div','gcard l');gl.style.setProperty('--c',bo?bo.c:'#c59bff');
+    const tg2=ce('div','gtag');tg2.append(ce('i'),document.createTextNode(bo?'Tình trạng':'Tổng quan'));
+    const st=[['Agent',ln.length],['Sẵn sàng',rd2],['Chờ',ln.length-rd2]];
+    const row=ce('div','grow');st.forEach(([k,v])=>{const d=ce('div','gcell');d.append(ce('small',null,k),ce('b',null,String(v)));row.appendChild(d);});
+    gl.append(tg2,ce('h4',null,bo?bo.name:'Văn phòng'),row);
+    M.append(gl,gr);
   }
   const prev=GL&&GL.cv.isConnected?GL.rot:0;
   GL={cv,pinEls,rot:prev,shift:!!bo,target:bo?-GPOS[bo.id][1]*Math.PI/180:null};
@@ -1009,7 +1044,7 @@ function renderCols(){
     [['Nhiệm vụ chính',ia.role||'—'],['Cấp',ia.sub||'—'],['Tổ chức',io?io.name:'—'],['Trạng thái',LABEL[ia.status]||'—']].forEach(([k,v])=>{const r=ce('div','ai');r.append(ce('small',null,k),ce('span',null,v));ag.appendChild(r);});
     bx.append(ah,ag);tp.appendChild(bx);
   }
-  tp.style.maxHeight='460px';tp.style.overflow='auto';
+
   const tb=ce('table','tbl');
   tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Cấp</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
@@ -1018,7 +1053,9 @@ function renderCols(){
     [a.name,o?o.name:'',a.sub||'—'].forEach(t=>tr.appendChild(ce('td',null,t)));
     const td=ce('td');td.appendChild(ce('span','st '+(a.status||'off'),LABEL[a.status]||''));tr.appendChild(td);body.appendChild(tr);
   });
-  tp.appendChild(tb);c.appendChild(tp);
+  tp.appendChild(tb);
+  const tlist=ce('div','tlist');Array.from(tp.children).forEach(ch=>{if(!ch.classList.contains('tphead'))tlist.appendChild(ch);});tp.appendChild(tlist);
+  c.appendChild(tp);
   tp.scrollTop=keepTop;window.scrollTo(0,keepWin);
 }
 function setMode3d(on){
