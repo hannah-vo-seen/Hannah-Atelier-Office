@@ -267,6 +267,31 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatInfo .ir{margin:6px 0}
 #chatInfo .ir b{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 #chat header .ava{cursor:pointer}
+.sphere{min-height:480px;padding:0}
+.planetbox{position:absolute;inset:0;z-index:0}
+.planetbox canvas{width:100%;height:100%;display:block}
+.pin{z-index:2;font-size:14px;padding:10px 16px 10px 13px;gap:8px}
+.pin::before{width:12px;height:12px}
+.pin b{font:800 16px var(--f-d)}
+.dgrid{grid-template-columns:240px 1fr}
+.ostrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.ostrip.one{grid-template-columns:1fr}
+.ocard{border-radius:20px;padding:14px 16px;background:var(--card);border:1px solid var(--line);cursor:pointer;border-top:4px solid var(--c)}
+.ocard.on{box-shadow:0 0 0 2px var(--c)}
+.ocard .on2{font:800 15px var(--f-d)}
+.ocard .om{font-size:13px;opacity:.8;margin-top:4px}
+.ocard .ob{display:flex;height:8px;border-radius:99px;overflow:hidden;background:rgba(127,127,160,.2);margin-top:10px}
+.ocard .ob i{display:block;height:100%}
+.ocard .ot{font-size:12px;margin-top:8px;opacity:.9}
+.ocard .ot b.late{color:#e5484d;font-weight:800}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.bcol{border-radius:20px;padding:14px;background:var(--card);border:1px solid var(--line);min-height:160px}
+.bcol h3{margin:0 0 10px;font:800 14px var(--f-d);display:flex;align-items:center;gap:8px}
+.bcol h3 i{width:10px;height:10px;border-radius:50%}
+.bitem{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.55);margin-bottom:8px;font-size:13px}
+body:not(.light) .bitem{background:rgba(255,255,255,.07)}
+.bitem small{display:block;opacity:.7;margin-top:3px;font-size:12px}
+@media(max-width:1000px){.ostrip{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -674,6 +699,35 @@ function ringBox(parts,size,sw,center){
 }
 function legendRow(label,v,col){const r=ce('div','lgr');const i=ce('i');i.style.background=col;r.append(i,ce('span',null,label),ce('b',null,String(v)));return r;}
 const PINS=[['20%','28%'],['80%','28%'],['20%','74%'],['80%','74%']];
+let planetR=null,planetScene=null,planetCam=null,planetGroup=null,planetHost=null;
+function initPlanet(){
+  if(planetR)return;
+  planetR=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  planetR.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  planetR.domElement.style.width='100%';planetR.domElement.style.height='100%';
+  planetScene=new THREE.Scene();
+  planetCam=new THREE.PerspectiveCamera(35,1,.1,50);planetCam.position.set(0,0,5.6);
+  planetScene.add(new THREE.AmbientLight(0xffffff,.85));
+  const key=new THREE.DirectionalLight(0xffffff,1.3);key.position.set(3,4,5);planetScene.add(key);
+  const p1=new THREE.PointLight(0xff9ad5,3,20);p1.position.set(-3,-1.5,3);planetScene.add(p1);
+  const p2=new THREE.PointLight(0x8fc4ff,3,20);p2.position.set(3,2,2.5);planetScene.add(p2);
+  planetGroup=new THREE.Group();planetGroup.rotation.z=.35;planetScene.add(planetGroup);
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(1.1,64,48),new THREE.MeshPhysicalMaterial({color:0xf1ecff,roughness:.08,metalness:0,iridescence:1,iridescenceIOR:1.35,iridescenceThicknessRange:[250,650],clearcoat:1,clearcoatRoughness:.05}));
+  planetGroup.add(ball);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.78,.075,24,180),new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.12,iridescence:1,iridescenceIOR:1.5,clearcoat:1,transparent:true,opacity:.9}));
+  ring.rotation.x=Math.PI/2.5;planetGroup.add(ring);
+  const loop=()=>{
+    requestAnimationFrame(loop);
+    if(!planetHost||!planetHost.isConnected)return;
+    const w=planetHost.clientWidth,h=planetHost.clientHeight;if(!w||!h)return;
+    const pr=planetR.getPixelRatio();
+    if(planetR.domElement.width!==Math.round(w*pr)||planetR.domElement.height!==Math.round(h*pr)){planetR.setSize(w,h,false);planetCam.aspect=w/h;planetCam.updateProjectionMatrix();}
+    planetGroup.rotation.y+=.005;
+    planetR.render(planetScene,planetCam);
+  };
+  loop();
+}
+function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);}
 function renderCols(){
   const c=$('cols');c.textContent='';
   const all=state.agents,tasks=state.tasks||[];
@@ -681,6 +735,7 @@ function renderCols(){
   const scoped=all.filter(a=>!listOrg||a.dept===listOrg);
   const rdy=scoped.filter(a=>a.status==='ready').length;
   const offN=scoped.filter(a=>a.status==='idle'||a.status==='off').length;
+  const tasksOf=(oid,st)=>tasks.filter(t=>orgOf(t)===oid&&(!st||t.status===st));
   const sTasks=tasks.filter(t=>!listOrg||orgOf(t)===listOrg);
   const done=sTasks.filter(t=>t.status==='done').length,doing=sTasks.filter(t=>t.status==='doing').length,late=sTasks.filter(t=>t.status==='late').length;
   const tTot=sTasks.length,donePct=tTot?Math.round(done/tTot*100):0;
@@ -692,9 +747,6 @@ function renderCols(){
   const gb=ce('button','gbtn','Xem đồ họa 3D');gb.onclick=()=>{g3d.checked=true;setMode3d(true)};
   hd.append(ht,gb);c.appendChild(hd);
 
-  const pills=ce('div','pills');
-  const mkp=(label,id,col)=>{const b=ce('button','pill-f'+(listOrg===id?' on':'')+(id?'':' all'),label);if(col)b.style.setProperty('--c',col);b.onclick=()=>{listOrg=id;renderCols()};pills.appendChild(b)};
-
   const g=ce('div','dgrid');
   const L=ce('div','dcol');
   const k1=ce('div','kchip');k1.append(ce('b',null,String(rdy)),ce('i',null,'Sẵn sàng'));
@@ -702,16 +754,11 @@ function renderCols(){
   L.append(k1,k2);
   const tc=ce('div','dcard');tc.appendChild(ce('div','ct','Tiến độ công việc'));
   if(!tTot){tc.appendChild(ce('div','mut','Chưa có việc nào trong agents.json.'));}
-  else{
-    tc.appendChild(ringBox([{v:done,col:C_OK},{v:doing,col:C_DO},{v:late,col:C_LATE}],130,14,donePct+'%'));
-    const lg=ce('div');lg.style.marginTop='10px';
-    lg.append(legendRow('Hoàn thành',done,C_OK),legendRow('Đang xử lý',doing,C_DO),legendRow('Trễ hạn',late,C_LATE));
-    tc.appendChild(lg);
-  }
+  else{tc.appendChild(ringBox([{v:done,col:C_OK},{v:doing,col:C_DO},{v:late,col:C_LATE}],130,14,donePct+'%'));const lg=ce('div');lg.style.marginTop='10px';lg.append(legendRow('Hoàn thành',done,C_OK),legendRow('Đang xử lý',doing,C_DO),legendRow('Trễ hạn',late,C_LATE));tc.appendChild(lg);}
   L.appendChild(tc);
 
   const M=ce('div','dcard sphere');
-  const img=ce('img','planet');img.src='planet.png';img.alt='';M.appendChild(img);
+  const host=ce('div','planetbox');M.appendChild(host);mountPlanet(host);
   ORGS.forEach((o,i)=>{
     const n=all.filter(a=>a.dept===o.id).length;
     const p=ce('button','pin'+(listOrg===o.id?' on':''));p.style.setProperty('--c',o.c);
@@ -720,15 +767,34 @@ function renderCols(){
     p.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     M.appendChild(p);
   });
+  g.append(L,M);c.appendChild(g);
 
-  const R2=ce('div','dcard');R2.appendChild(ce('div','ct','Tổ chức'));
-  ORGS.forEach(o=>{
+  const strip=ce('div','ostrip'+(org?' one':''));
+  (org?[org]:ORGS).forEach(o=>{
     const l=all.filter(a=>a.dept===o.id),rd=l.filter(a=>a.status==='ready').length;
-    const row=ce('div','orow');const dot=ce('i');dot.style.background=o.c;
-    row.append(dot,ce('span',null,o.name),ce('b',null,l.length+' agent'),ce('em',null,(l.length?Math.round(rd/l.length*100):0)+'%'));
-    row.onclick=()=>{listOrg=o.id;renderCols()};R2.appendChild(row);
+    const ot=tasksOf(o.id);
+    const dn=ot.filter(t=>t.status==='done').length,dg=ot.filter(t=>t.status==='doing').length,lt=ot.filter(t=>t.status==='late').length;
+    const card=ce('div','ocard'+(listOrg===o.id?' on':''));card.style.setProperty('--c',o.c);
+    card.append(ce('div','on2',o.name),ce('div','om',l.length+' agent · '+rd+' sẵn sàng'));
+    const bar=ce('div','ob');
+    [[dn,C_OK],[dg,C_DO],[lt,C_LATE]].forEach(([v,col])=>{if(!v)return;const seg=ce('i');seg.style.width=(v/Math.max(1,ot.length)*100)+'%';seg.style.background=col;bar.appendChild(seg);});
+    card.append(bar);
+    const ts=ce('div','ot');ts.append(ce('span',null,dn+' xong · '+dg+' đang xử lý · '),ce('b','late',lt+' trễ hạn'));card.append(ts);
+    card.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
+    strip.appendChild(card);
   });
-  g.append(L,M,R2);c.appendChild(g);
+  c.appendChild(strip);
+
+  if(org){
+    const bd=ce('div','board');
+    [['Đang xử lý',tasksOf(org.id,'doing'),C_DO],['Trễ hạn',tasksOf(org.id,'late'),C_LATE],['Hoàn thành',tasksOf(org.id,'done'),C_OK]].forEach(([title,arr,col])=>{
+      const bc=ce('div','bcol');const h=ce('h3');const dot=ce('i');dot.style.background=col;h.append(dot,ce('span',null,title+' · '+arr.length));bc.appendChild(h);
+      if(!arr.length)bc.appendChild(ce('div','mut','Chưa có việc'));
+      arr.forEach(t=>{const it=ce('div','bitem');const a=all.find(x=>x.id===t.agent);it.append(ce('div',null,t.title||t.id));it.append(ce('small',null,(a?a.name:(t.agent||''))+(t.due?' · hạn '+t.due:'')));bc.appendChild(it);});
+      bd.appendChild(bc);
+    });
+    c.appendChild(bd);
+  }
 
   const rings=ce('div','rings');
   ORGS.forEach(o=>{
@@ -741,6 +807,7 @@ function renderCols(){
     rb.appendChild(sb);rings.appendChild(rb);
   });
   c.appendChild(rings);
+  const tb0=ce('div');
   const tp=ce('div','dcard');tp.style.marginTop='16px';
   tp.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));
   const tpills=ce('div','pills');
