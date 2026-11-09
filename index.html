@@ -919,7 +919,7 @@ async function api(path,payload){
 function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
-  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
+  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! '+((chatA&&chatA.greet)||('Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.'));h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
