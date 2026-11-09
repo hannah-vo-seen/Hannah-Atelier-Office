@@ -152,6 +152,11 @@ body.light .orb{box-shadow:inset -18px -22px 40px rgba(60,30,120,.25),inset 14px
 .pill-f:hover,.gbtn:hover,.btn:hover,.zoom button:hover,#subbar button:hover{transform:translateY(-1px);filter:brightness(1.06)}
 body.list-mode .pill-f.on.all{background:linear-gradient(90deg,#ff8fc0,#a78bfa 50%,#7fb2ff);color:#fff;border-color:transparent}
 body.list-mode .pill-f.on:not(.all){background:var(--c,#9d7bff);color:#fff;border-color:transparent}
+.stack{display:flex;height:8px;border-radius:99px;overflow:hidden;background:rgba(127,127,160,.18);margin:12px 0 10px}
+.stack i{display:block;height:100%}
+body .oc.brk{background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+body .oc.brk .on2{color:var(--ink)}
+body .oc.brk .sub2{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -558,15 +563,21 @@ function renderCols(){
   [['Agent',all.length],['Sẵn sàng',cnt('ready')],['Đang chờ',cnt('waiting')],['Chưa xây',cnt('planned')]].forEach(([l,v])=>{
     const d=document.createElement('div');d.className='sc';const b=document.createElement('b');b.textContent=v;const i=document.createElement('i');i.textContent=l;d.append(b,i);st.appendChild(d)});
   c.appendChild(st);
-  const og=document.createElement('div');og.className='orgs';
+  const og=document.createElement('div');og.className='orgs brkwrap';og.hidden=!!listOrg;
+  const BRK=[['ready','Sẵn sàng','#35d6a0'],['waiting','Đang chờ','#ffd25e'],['idle','Nghỉ','#8ea0c4'],['off','Tắt','#6b7896'],['planned','Chưa xây','#c4b5fd']];
   ORGS.forEach(o=>{
-    const list=all.filter(a=>a.dept===o.id),rd=list.filter(a=>a.status==='ready').length,pct=list.length?Math.round(rd/list.length*100):0;
-    const d=document.createElement('div');d.className='oc';d.style.setProperty('--c',o.c);d.style.cursor='pointer';
-    d.innerHTML='<div class="on2"></div><div class="sub2"></div><div class="bar"><i></i></div>';
-    d.querySelector('.on2').textContent=o.name;
-    d.querySelector('.sub2').textContent=list.length+' agent · '+rd+' sẵn sàng';
-    d.querySelector('.bar i').style.width=pct+'%';
-    d.onclick=()=>{listOrg=o.id;renderCols()};og.appendChild(d)});
+    const list=all.filter(a=>a.dept===o.id);
+    const d=document.createElement('div');d.className='oc brk';d.style.setProperty('--c',o.c);
+    const h=document.createElement('div');h.className='on2';h.textContent=o.name;
+    const sub=document.createElement('div');sub.className='sub2';sub.textContent=list.length+' agent';
+    const bar=document.createElement('div');bar.className='stack';
+    const parts=[];
+    BRK.forEach(([k,l,col])=>{
+      const v=list.filter(a=>(a.status||'off')===k).length;if(!v)return;
+      const seg=document.createElement('i');seg.style.width=(v/list.length*100)+'%';seg.style.background=col;seg.title=l+': '+v;bar.appendChild(seg);
+      parts.push(v+' '+l.toLowerCase())});
+    const lg=document.createElement('div');lg.className='sub2';lg.textContent=parts.join(' · ')||'Chưa có agent';
+    d.append(h,sub,bar,lg);og.appendChild(d)});
   c.appendChild(og);
   const sp=document.createElement('div');sp.className='split';
   const tp=document.createElement('div');tp.className='panel';
