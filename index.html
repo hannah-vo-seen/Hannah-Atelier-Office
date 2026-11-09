@@ -396,7 +396,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .gcard h4{font:800 20px var(--f-d);margin:0;padding-right:22px}
 .gcard p{margin:8px 0 0;font-size:13px;line-height:1.5;opacity:.85}
 .gcard .gx{position:absolute;top:8px;right:10px;border:0;background:none;color:inherit;cursor:pointer;font-size:16px;opacity:.7}
-@media(max-width:640px){.gcard.l{display:none}.gcard.r{transform:none;top:auto}.hud,.cnr{display:none}.dcard.sphere .pin{font-size:11px;padding:3px 9px 3px 3px;gap:6px}.dcard.sphere .pin b{width:22px;height:22px;font-size:11px}.dcard.sphere .pin span{font-size:11px}.planetbox canvas{height:260px;bottom:auto}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
+@media(max-width:640px){.dcard.sphere{height:auto!important;min-height:0!important;overflow:visible}.dcard.sphere .gcard.r{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;transform:none!important;width:auto!important;margin:272px 12px 14px!important}.gcard.l{display:none}.gcard.r{transform:none;top:auto}.hud,.cnr{display:none}.dcard.sphere .pin{font-size:11px;padding:3px 9px 3px 3px;gap:6px}.dcard.sphere .pin b{width:22px;height:22px;font-size:11px}.dcard.sphere .pin span{font-size:11px}.planetbox canvas{height:260px;bottom:auto}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
 
 .dcard.sphere{background:radial-gradient(circle at 50% 42%,#2a1450 0%,#0e0820 58%,#06040d 100%);color:#f4f0ff;border-color:rgba(176,107,255,.45);box-shadow:inset 0 0 0 1px rgba(176,107,255,.25),0 0 40px -10px rgba(155,77,255,.7)}
 .gridbg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(176,107,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(176,107,255,.09) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);pointer-events:none}
@@ -469,7 +469,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
   </aside>
 
   <section class="dash" id="cols" hidden></section>
-  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
+  <details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
@@ -810,7 +810,6 @@ function loop(){
   renderer.render(scene,camera);
   updateLabels();
 }
-renderer.setAnimationLoop(loop);
 
 /* ---------- chế độ danh sách ---------- */
 const g3d=$('g3d');
@@ -1061,13 +1060,13 @@ function setMode3d(on){
   $('stage').hidden=!on;document.querySelector('aside').hidden=!on;
   $('cols').hidden=on;document.querySelector('.note').hidden=!on;
   document.body.classList.toggle('list-mode',!on);
-  if(on){renderer.setAnimationLoop(loop)}else{renderer.setAnimationLoop(null);renderCols()}
+  renderer.setAnimationLoop(null);renderCols();
   try{localStorage.setItem('vpd-3d',on?'1':'0')}catch(_){}
 }
 g3d.onchange=()=>setMode3d(g3d.checked);
 let saved3d=null;try{saved3d=localStorage.getItem('vpd-3d')}catch(_){}
 const isPhone=(window.matchMedia&&matchMedia('(max-width:860px)').matches)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-g3d.checked=(saved3d==='1')||(saved3d===null&&isPhone);
+g3d.checked=false;
 
 /* ---------- data ---------- */
 buildChips();
