@@ -78,7 +78,7 @@
       "name": "Supervisor – Bách Quang",
       "role": "Giám sát Team Leader của Bách Quang, duyệt kế hoạch trong thương hiệu",
       "greet": "Chị muốn xem kế hoạch nào của Bách Quang ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-09",
@@ -88,7 +88,7 @@
       "name": "Team Leader – Bách Quang",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Bách Quang",
       "greet": "Chị giao việc cho Bách Quang, em sẽ lập kế hoạch và chia việc.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-10",
@@ -98,7 +98,7 @@
       "name": "Content – Bách Quang",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Chị muốn em viết nội dung gì cho Bách Quang ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-11",
@@ -108,7 +108,7 @@
       "name": "Ads – Bách Quang",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Chị hỏi về quảng cáo của Bách Quang, em đo lường cho chị.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-12",
@@ -118,7 +118,7 @@
       "name": "Product Research – Bách Quang",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Chị cần nghiên cứu sản phẩm nào của Bách Quang ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-13",
@@ -128,7 +128,7 @@
       "name": "Market Research – Bách Quang",
       "role": "Nghiên cứu thị trường",
       "greet": "Chị muốn em tìm hiểu thị trường nào cho Bách Quang?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-14",
@@ -138,7 +138,7 @@
       "name": "Trend & Event – Bách Quang",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Bách Quang?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "bq-15",
@@ -148,7 +148,7 @@
       "name": "Creative & Design – Bách Quang",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Chị cần ý tưởng hay thiết kế gì cho Bách Quang ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-16",
@@ -158,7 +158,7 @@
       "name": "Supervisor – Asia New Vision",
       "role": "Giám sát Team Leader của Asia New Vision, duyệt kế hoạch trong thương hiệu",
       "greet": "Chị muốn xem kế hoạch nào của Asia New Vision ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-17",
@@ -168,7 +168,7 @@
       "name": "Team Leader – Asia New Vision",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Asia New Vision",
       "greet": "Chị giao việc cho Asia New Vision, em sẽ lập kế hoạch và chia việc.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-18",
@@ -178,7 +178,7 @@
       "name": "Content – Asia New Vision",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Chị muốn em viết nội dung gì cho Asia New Vision ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-19",
@@ -188,7 +188,7 @@
       "name": "Ads – Asia New Vision",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Chị hỏi về quảng cáo của Asia New Vision, em đo lường cho chị.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-20",
@@ -198,7 +198,7 @@
       "name": "Product Research – Asia New Vision",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Chị cần nghiên cứu sản phẩm nào của Asia New Vision ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-21",
@@ -208,7 +208,7 @@
       "name": "Market Research – Asia New Vision",
       "role": "Nghiên cứu thị trường",
       "greet": "Chị muốn em tìm hiểu thị trường nào cho Asia New Vision?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-22",
@@ -218,7 +218,7 @@
       "name": "Trend & Event – Asia New Vision",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Asia New Vision?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "mka-23",
@@ -228,7 +228,7 @@
       "name": "Creative & Design – Asia New Vision",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Chị cần ý tưởng hay thiết kế gì cho Asia New Vision ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-24",
@@ -238,7 +238,7 @@
       "name": "Supervisor – Ember Lens",
       "role": "Giám sát Team Leader của Ember Lens, duyệt kế hoạch trong thương hiệu",
       "greet": "Chị muốn xem kế hoạch nào của Ember Lens ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-25",
@@ -248,7 +248,7 @@
       "name": "Team Leader – Ember Lens",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Ember Lens",
       "greet": "Chị giao việc cho Ember Lens, em sẽ lập kế hoạch và chia việc.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-26",
@@ -258,7 +258,7 @@
       "name": "Content – Ember Lens",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Chị muốn em viết nội dung gì cho Ember Lens ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-27",
@@ -268,7 +268,7 @@
       "name": "Ads – Ember Lens",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Chị hỏi về quảng cáo của Ember Lens, em đo lường cho chị.",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-28",
@@ -278,7 +278,7 @@
       "name": "Product Research – Ember Lens",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Chị cần nghiên cứu sản phẩm nào của Ember Lens ạ?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-29",
@@ -288,7 +288,7 @@
       "name": "Market Research – Ember Lens",
       "role": "Nghiên cứu thị trường",
       "greet": "Chị muốn em tìm hiểu thị trường nào cho Ember Lens?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-30",
@@ -298,7 +298,7 @@
       "name": "Trend & Event – Ember Lens",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Chị muốn em theo dõi xu hướng hay sự kiện nào cho Ember Lens?",
-      "status": "planned"
+      "status": "ready"
     },
     {
       "id": "el-31",
@@ -308,7 +308,7 @@
       "name": "Creative & Design – Ember Lens",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Chị cần ý tưởng hay thiết kế gì cho Ember Lens ạ?",
-      "status": "planned"
+      "status": "ready"
     }
   ],
   "activity": [],
