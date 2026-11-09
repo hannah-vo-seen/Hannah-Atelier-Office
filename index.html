@@ -184,6 +184,26 @@ body .oc.brk .sub2{color:var(--mut)}
 #pmSkip{background:rgba(255,255,255,.15)!important}
 .pill-f:not(.all)::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c,transparent);margin-right:7px;vertical-align:middle;box-shadow:0 0 6px var(--c,transparent)}
 body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
+#chat{background:linear-gradient(160deg,rgba(255,255,255,.96),rgba(238,232,255,.94));color:#2b2f45;border:2px solid #fff;border-radius:28px;box-shadow:0 18px 50px rgba(140,110,220,.28)}
+#chat header{border-bottom:1px dashed rgba(150,130,220,.4);font:800 16px var(--f-d);color:#4a3f8a;border-radius:28px 28px 0 0}
+#chat header button{color:#8a6fd6;font-weight:700}
+#chat header .ava{width:34px;height:34px;object-fit:contain;border-radius:50%;background:#fff;box-shadow:0 4px 12px rgba(150,120,255,.3);margin-right:8px;vertical-align:middle;padding:3px}
+#chat .log{background:transparent}
+#chat .m{font-size:14px;line-height:1.45}
+#chat .m.u{background:linear-gradient(90deg,#ffb3d9,#b9c8ff);color:#fff;border-radius:20px 20px 6px 20px;box-shadow:0 6px 14px rgba(255,160,210,.35)}
+#chat .m.b{background:#fff;color:#2b2f45;border-radius:20px 20px 20px 6px;box-shadow:0 6px 16px rgba(120,100,200,.16);border:1px solid rgba(255,255,255,.95)}
+#chat .row{display:flex;gap:8px;align-items:flex-end;max-width:92%}
+#chat .row .m{max-width:100%}
+#chat img.rb{width:30px;height:30px;object-fit:contain;flex:none;background:#fff;border-radius:50%;padding:2px;box-shadow:0 3px 10px rgba(150,120,255,.25)}
+#chat .hello{margin:auto;text-align:center;color:#6f63a6;display:flex;flex-direction:column;align-items:center;gap:6px}
+#chat .hello img{width:120px;height:120px;object-fit:contain;animation:bob 3.5s ease-in-out infinite}
+#chat .hello p{margin:0;font:700 14px var(--f-d)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#chat .note{color:#7a6fa8;opacity:1}
+#chat form{border-top:1px dashed rgba(150,130,220,.4)}
+#chat input{background:#fff;border:1px solid #e3dcff;color:#2b2f45;border-radius:999px}
+#chat input::placeholder{color:#a79fcf}
+#chat form button{background:linear-gradient(90deg,#ffb3d9,#b9c8ff);color:#fff;box-shadow:0 6px 14px rgba(255,160,210,.35)}
 </style>
 </head>
 <body>
@@ -226,7 +246,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><header><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
+<div id="chat" hidden><header><img class="ava" src="assets/planet.png" alt=""><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
@@ -666,10 +686,10 @@ async function api(path,payload){
   if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
   return d;
 }
-function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;$('chatLog').appendChild(d);$('chatLog').scrollTop=1e9;}
+function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='assets/robot.png';im.alt='';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
-  $('chatLog').textContent='';d.history.forEach(m=>bubble(m.content,m.role==='user'));
+  $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='assets/robot.png';im.alt='';const t=document.createElement('p');t.textContent='Chào chị! Nhắn gì cho '+chatA.name+' nhé.';h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
