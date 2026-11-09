@@ -429,6 +429,8 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .dcard.sphere .pin span{font-size:11px;font-weight:600}
 .dcard.sphere .pin::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
 @media(max-width:640px){.dcard.sphere .pin{padding:2px 8px 2px 7px;font-size:10px}}
+.tbl thead th{position:sticky;top:0;z-index:2;background:var(--panel)}
+.tbl-card .tlist .tbl thead th{background:var(--panel)}
 </style>
 </head>
 <body>
@@ -966,26 +968,6 @@ function renderCols(){
     p.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     M.appendChild(p);pinEls.push(p);
   });
-  {
-    const sup=bo?all.find(a=>a.dept===bo.id&&a.sub==='Giám sát'):null;
-    const ln=bo?all.filter(a=>a.dept===bo.id):all;
-    const rd2=ln.filter(a=>a.status==='ready').length;
-    const gr=ce('div','gcard r');
-    if(bo){
-      gr.style.setProperty('--c',bo.c);const gx=ce('button','gx','✕');gx.type='button';gx.title='Đóng';gx.onclick=()=>{listOrg=null;renderCols()};
-      const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode('Thương hiệu · '+ln.length+' agent'));
-      gr.append(gx,tg,ce('h4',null,bo.name),ce('p',null,rd2+' sẵn sàng'),ce('p',null,sup?sup.role:''));
-    }else{
-      const tg=ce('div','gtag');tg.append(ce('i'),document.createTextNode('Chọn thương hiệu'));
-      gr.append(tg,ce('h4',null,'Bấm một brand'),ce('p',null,'Bấm ghim trên quả địa cầu để xem thương hiệu đó.'));
-    }
-    const gl=ce('div','gcard l');gl.style.setProperty('--c',bo?bo.c:'#c59bff');
-    const tg2=ce('div','gtag');tg2.append(ce('i'),document.createTextNode(bo?'Tình trạng':'Tổng quan'));
-    const st=[['Agent',ln.length],['Sẵn sàng',rd2],['Chờ',ln.length-rd2]];
-    const row=ce('div','grow');st.forEach(([k,v])=>{const d=ce('div','gcell');d.append(ce('small',null,k),ce('b',null,String(v)));row.appendChild(d);});
-    gl.append(tg2,ce('h4',null,bo?bo.name:'Văn phòng'),row);
-    M.append(gl,gr);
-  }
   const prev=GL&&GL.cv.isConnected?GL.rot:0;
   GL={cv,pinEls,rot:prev,shift:!!bo,target:bo?-GPOS[bo.id][1]*Math.PI/180:null};
   if(!globeStarted){globeStarted=true;requestAnimationFrame(globeTick);}
