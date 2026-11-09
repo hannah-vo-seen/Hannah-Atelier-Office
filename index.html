@@ -648,8 +648,8 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
-let pass='';try{pass=sessionStorage.getItem('vpd-pass')||''}catch(_){}
-function setPass(v){pass=(v||'').trim();try{sessionStorage.setItem('vpd-pass',pass)}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
+let pass='';try{pass=localStorage.getItem('vpd-pass')||''}catch(_){}
+function setPass(v){pass=(v||'').trim();try{localStorage.setItem('vpd-pass',pass)}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
 $('passSave').onclick=()=>setPass($('pass').value);
 setPass(pass);
 function closePM(){$('passModal').hidden=true;}
