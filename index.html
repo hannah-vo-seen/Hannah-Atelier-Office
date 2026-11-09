@@ -623,7 +623,7 @@ function renderCols(){
   mkp('Tất cả',null);ORGS.forEach(o=>mkp(o.name,o.id,o.c));c.appendChild(pills);
   const cnt=k=>all.filter(a=>a.status===k).length;
   const st=document.createElement('div');st.className='stats4';
-  [['Agent',all.length],['Sẵn sàng',cnt('ready')],['Đang chờ',cnt('waiting')],['Chưa xây',cnt('planned')]].forEach(([l,v])=>{
+  (()=>{const rdy=all.filter(a=>a.status==='ready').length;const pct=all.length?Math.round(rdy/all.length*100)+'%':'0%';const off=all.filter(a=>a.status==='idle'||a.status==='off').length;const big=ORGS.map(o=>({o,n:all.filter(a=>a.dept===o.id).length})).sort((x,y)=>y.n-x.n)[0];return [['Tỷ lệ sẵn sàng',pct],['Nghỉ / tắt',off],['Tổ chức lớn nhất',big?big.o.name:'—'],['Số tổ chức',ORGS.length]]})().forEach(([l,v])=>{
     const d=document.createElement('div');d.className='sc';const b=document.createElement('b');b.textContent=v;const i=document.createElement('i');i.textContent=l;d.append(b,i);st.appendChild(d)});
   c.appendChild(st);
   const og=document.createElement('div');og.className='charts';og.hidden=!!listOrg;
