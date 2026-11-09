@@ -461,7 +461,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 #intro .in-gl.show{opacity:1;transform:none}
 #intro .in-greet{min-height:120px;margin-bottom:18px}
 #intro .in-bar{height:6px;border-radius:9px;background:#ffffff1f;overflow:hidden;margin:0 auto 10px;width:70%;max-width:320px}
-#intro .in-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd27a,#ff9fe0,#b99cff);transition:width 5s linear}
+#intro .in-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd27a,#ff9fe0,#b99cff);transition:width 3s linear}
 #intro .in-bar i.go{width:100%}
 #intro .in-hint{font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.18em;color:#9d8ccc;text-transform:uppercase}
 </style>
@@ -476,7 +476,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
   <div class="in-bottom">
     <div class="in-greet"><div id="inG1" class="in-gl">Hi Hannah! 👋</div><div id="inG3" class="in-gl">31 agent đã sẵn sàng ạ ✨</div></div>
     <div class="in-bar"><i id="inPb"></i></div>
-    <div class="in-hint">Tự vào sau <span id="inCd">5</span>s</div>
+    <div class="in-hint">Tự vào sau <span id="inCd">3</span>s</div>
   </div>
 </div>
 <div class="wrap">
@@ -534,7 +534,8 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
   setTimeout(function(){document.getElementById('inG1').classList.add('show');},300);
   setTimeout(function(){document.getElementById('inG3').classList.add('show');},1200);
   setTimeout(function(){document.getElementById('inPb').classList.add('go');},100);
-  var n=5,cd=document.getElementById('inCd');
+  var n=3,cd=document.getElementById('inCd');
+  cd.textContent=n;
   var t=setInterval(function(){
     n--;cd.textContent=Math.max(n,0);
     if(n<=0){clearInterval(t);box.classList.add('out');box.setAttribute('aria-hidden','true');}
