@@ -241,7 +241,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
   </aside>
 
   <section class="dash" id="cols" hidden></section>
-  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><input type="password" id="pass" placeholder="Mật khẩu chat"><button id="passSave" type="button">Lưu</button><span id="passState"></span></div></details>
+  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
@@ -670,9 +670,9 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
-let pass='';try{pass=localStorage.getItem('vpd-pass')||''}catch(_){}
-function setPass(v){pass=(v||'').trim();try{localStorage.setItem('vpd-pass',pass)}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
-$('passSave').onclick=()=>setPass($('pass').value);
+let pass='';try{pass=localStorage.getItem('vpd-pass')||sessionStorage.getItem('vpd-pass')||''}catch(_){}
+function setPass(v){pass=(v||'').trim();try{if(pass){localStorage.setItem('vpd-pass',pass);sessionStorage.removeItem('vpd-pass');}else{localStorage.removeItem('vpd-pass');sessionStorage.removeItem('vpd-pass');}}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
+$('passClear').onclick=()=>{setPass('');$('passModal').hidden=false;};
 setPass(pass);
 function closePM(){$('passModal').hidden=true;}
 $('pmOk').onclick=()=>{const v=$('pmIn').value.trim();if(v){setPass(v);closePM();$('pmIn').value='';}};
