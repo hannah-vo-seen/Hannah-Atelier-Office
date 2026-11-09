@@ -157,6 +157,22 @@ body.list-mode .pill-f.on:not(.all){background:var(--c,#9d7bff);color:#fff;borde
 body .oc.brk{background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:0 8px 24px rgba(0,0,0,.12)}
 body .oc.brk .on2{color:var(--ink)}
 body .oc.brk .sub2{color:var(--mut)}
+.tok{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.tok input{flex:1;min-width:160px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;font:14px var(--f)}
+.tok button{border:0;border-radius:999px;padding:7px 14px;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);color:#fff;font:800 13px var(--f-d);cursor:pointer}
+.tok span{font-size:12px;color:var(--mut)}
+#chat{position:fixed;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(520px,70vh);display:flex;flex-direction:column;background:rgba(8,8,12,.94);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:20;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#chat[hidden]{display:none!important}
+#chat header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.15);font:800 15px var(--f-d)}
+#chat header button{border:0;background:none;color:#fff;cursor:pointer;font:700 13px var(--f)}
+#chat .log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+#chat .m{max-width:85%;padding:8px 11px;border-radius:14px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+#chat .m.u{align-self:flex-end;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);color:#fff}
+#chat .m.b{align-self:flex-start;background:rgba(255,255,255,.12)}
+#chat .note{font-size:12px;opacity:.75;padding:0 14px 6px;min-height:14px}
+#chat form{display:flex;gap:8px;padding:10px;border-top:1px solid rgba(255,255,255,.15)}
+#chat input{flex:1;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;padding:9px 14px;font:14px var(--f)}
+#chat form button{border:0;border-radius:999px;padding:0 16px;background:linear-gradient(90deg,#ff8fc0,#7fb2ff);color:#fff;font:800 13px var(--f-d);cursor:pointer}
 </style>
 </head>
 <body>
@@ -194,10 +210,11 @@ body .oc.brk .sub2{color:var(--mut)}
   </aside>
 
   <section class="dash" id="cols" hidden></section>
-  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label></details>
+  <details class="settings"><summary>Cài đặt</summary><label><input type="checkbox" id="g3d"> Bật đồ họa 3D (tắt để xem dạng danh sách)</label><div class="tok"><input type="password" id="pass" placeholder="Mật khẩu chat"><button id="passSave" type="button">Lưu</button><span id="passState"></span></div></details>
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
+<div id="chat" hidden><header><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
@@ -586,7 +603,7 @@ function renderCols(){
   tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Phòng ban</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
   all.filter(a=>!listOrg||a.dept===listOrg).sort((x,y)=>ORGS.findIndex(o=>o.id===x.dept)-ORGS.findIndex(o=>o.id===y.dept)||(x.order||0)-(y.order||0)).forEach(a=>{
-    const o=ORGS.find(z=>z.id===a.dept),tr=document.createElement('tr');
+    const o=ORGS.find(z=>z.id===a.dept),tr=document.createElement('tr');tr.style.cursor='pointer';tr.onclick=()=>openChat(a);
     const cells=[a.name,o?o.name:'',a.sub||'—'];
     cells.forEach(t=>{const td=document.createElement('td');td.textContent=t;tr.appendChild(td)});
     const td=document.createElement('td');const sp2=document.createElement('span');sp2.className='st '+(a.status||'off');sp2.textContent=LABEL[a.status]||'';td.appendChild(sp2);tr.appendChild(td);
@@ -618,6 +635,43 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
 }).catch(()=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
+
+/* ---------- chat qua Cloudflare Worker ---------- */
+const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
+let pass='';try{pass=sessionStorage.getItem('vpd-pass')||''}catch(_){}
+function setPass(v){pass=(v||'').trim();try{sessionStorage.setItem('vpd-pass',pass)}catch(_){}$('passState').textContent=pass?'Đã bật chat':'Chỉ xem';}
+$('passSave').onclick=()=>setPass($('pass').value);
+setPass(pass);
+let chatA=null,chatTimer=null;
+async function api(path,payload){
+  const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,pass,agent:chatA.id})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+  return d;
+}
+function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;$('chatLog').appendChild(d);$('chatLog').scrollTop=1e9;}
+async function loadHist(){
+  const d=await api('/history',{});
+  $('chatLog').textContent='';d.history.forEach(m=>bubble(m.content,m.role==='user'));
+}
+function openChat(a){
+  chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
+  clearInterval(chatTimer);
+  if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Nhập mật khẩu chat trong Cài đặt để trò chuyện.';return;}
+  $('chatForm').hidden=false;
+  loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
+  chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
+}
+let sending=false;
+$('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);};
+$('chatForm').onsubmit=async e=>{
+  e.preventDefault();
+  const t=$('chatIn').value.trim();if(!t||!chatA||sending)return;
+  $('chatIn').value='';bubble(t,true);sending=true;$('chatNote').textContent='Agent đang trả lời...';
+  try{const d=await api('/chat',{message:t});bubble(d.answer,false);$('chatNote').textContent='';}
+  catch(err){$('chatNote').textContent='Lỗi: '+err.message;}
+  finally{sending=false;}
+};
 </script>
 </body>
 </html>
