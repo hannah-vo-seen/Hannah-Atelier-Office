@@ -657,7 +657,8 @@ async function loadHist(){
 function openChat(a){
   chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
   clearInterval(chatTimer);
-  if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Nhập mật khẩu chat trong Cài đặt để trò chuyện.';return;}
+  if(!pass){const p=window.prompt('Nhập mật khẩu chat');if(p&&p.trim())setPass(p);}
+  if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
   $('chatForm').hidden=false;
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
