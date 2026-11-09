@@ -204,6 +204,20 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat input{background:#fff;border:1px solid #e3dcff;color:#2b2f45;border-radius:999px}
 #chat input::placeholder{color:#a79fcf}
 #chat form button{background:linear-gradient(90deg,#ffb3d9,#b9c8ff);color:#fff;box-shadow:0 6px 14px rgba(255,160,210,.35)}
+.charts{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}
+.charts[hidden]{display:none!important}
+@media(max-width:860px){.charts{grid-template-columns:1fr}}
+.donutwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
+.donut{width:150px;height:150px}
+.donut-num{font:800 22px var(--f-d);fill:var(--ink)}
+.legend .lg{display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0;min-width:150px}
+.legend .lg i{width:10px;height:10px;border-radius:50%;flex:none}
+.legend .lg b{margin-left:auto}
+.hrow{display:grid;grid-template-columns:150px 1fr 36px;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.hname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.htrack{display:flex;height:12px;border-radius:99px;background:rgba(127,127,160,.15);overflow:hidden}
+.htrack i{display:block;height:100%}
+.hrow b{text-align:right}
 </style>
 </head>
 <body>
@@ -612,21 +626,34 @@ function renderCols(){
   [['Agent',all.length],['Sẵn sàng',cnt('ready')],['Đang chờ',cnt('waiting')],['Chưa xây',cnt('planned')]].forEach(([l,v])=>{
     const d=document.createElement('div');d.className='sc';const b=document.createElement('b');b.textContent=v;const i=document.createElement('i');i.textContent=l;d.append(b,i);st.appendChild(d)});
   c.appendChild(st);
-  const og=document.createElement('div');og.className='orgs brkwrap';og.hidden=!!listOrg;
+  const og=document.createElement('div');og.className='charts';og.hidden=!!listOrg;
   const BRK=[['ready','Sẵn sàng','#35d6a0'],['waiting','Đang chờ','#ffd25e'],['idle','Nghỉ','#8ea0c4'],['off','Tắt','#6b7896'],['planned','Chưa xây','#c4b5fd']];
-  ORGS.forEach(o=>{
-    const list=all.filter(a=>a.dept===o.id);
-    const d=document.createElement('div');d.className='oc brk';d.style.setProperty('--c',o.c);
-    const h=document.createElement('div');h.className='on2';h.textContent=o.name;
-    const sub=document.createElement('div');sub.className='sub2';sub.textContent=list.length+' agent';
-    const bar=document.createElement('div');bar.className='stack';
-    const parts=[];
-    BRK.forEach(([k,l,col])=>{
-      const v=list.filter(a=>(a.status||'off')===k).length;if(!v)return;
-      const seg=document.createElement('i');seg.style.width=(v/list.length*100)+'%';seg.style.background=col;seg.title=l+': '+v;bar.appendChild(seg);
-      parts.push(v+' '+l.toLowerCase())});
-    const lg=document.createElement('div');lg.className='sub2';lg.textContent=parts.join(' · ')||'Chưa có agent';
-    d.append(h,sub,bar,lg);og.appendChild(d)});
+  const NS='http://www.w3.org/2000/svg';
+  const counts=BRK.map(([k,l,col])=>({l,col,v:all.filter(a=>(a.status||'off')===k).length}));
+  const total=all.length||1;
+  const dp=document.createElement('div');dp.className='panel chart';
+  const dh=document.createElement('h2');dh.textContent='Trạng thái toàn văn phòng';dp.appendChild(dh);
+  const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 120 120');svg.setAttribute('class','donut');
+  const R=46,C=2*Math.PI*R;let acc=0;
+  counts.forEach(x=>{if(!x.v)return;const c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',60);c.setAttribute('cy',60);c.setAttribute('r',R);c.setAttribute('fill','none');
+    c.setAttribute('stroke',x.col);c.setAttribute('stroke-width',16);
+    const len=x.v/total*C;c.setAttribute('stroke-dasharray',len+' '+(C-len));c.setAttribute('stroke-dashoffset',-acc);
+    c.setAttribute('transform','rotate(-90 60 60)');svg.appendChild(c);acc+=len;});
+  const tx=document.createElementNS(NS,'text');tx.setAttribute('x',60);tx.setAttribute('y',66);tx.setAttribute('text-anchor','middle');tx.setAttribute('class','donut-num');tx.textContent=all.length;svg.appendChild(tx);
+  const lg=document.createElement('div');lg.className='legend';
+  counts.forEach(x=>{const r=document.createElement('div');r.className='lg';const sw=document.createElement('i');sw.style.background=x.col;const t=document.createElement('span');t.textContent=x.l;const n=document.createElement('b');n.textContent=x.v;r.append(sw,t,n);lg.appendChild(r)});
+  const dw=document.createElement('div');dw.className='donutwrap';dw.append(svg,lg);dp.appendChild(dw);
+  const op=document.createElement('div');op.className='panel chart';
+  const oh=document.createElement('h2');oh.textContent='Agent theo tổ chức';op.appendChild(oh);
+  const maxN=Math.max(1,...ORGS.map(o=>all.filter(a=>a.dept===o.id).length));
+  ORGS.forEach(o=>{const list=all.filter(a=>a.dept===o.id);const row=document.createElement('div');row.className='hrow';
+    const nm=document.createElement('div');nm.className='hname';nm.textContent=o.name;
+    const track=document.createElement('div');track.className='htrack';
+    BRK.forEach(([k,l,col])=>{const v=list.filter(a=>(a.status||'off')===k).length;if(!v)return;const seg=document.createElement('i');seg.style.width=(v/maxN*100)+'%';seg.style.background=col;seg.title=l+': '+v;track.appendChild(seg);});
+    const num=document.createElement('b');num.textContent=list.length;
+    row.append(nm,track,num);op.appendChild(row);});
+  og.append(dp,op);
   c.appendChild(og);
   const sp=document.createElement('div');sp.className='split';
   const tp=document.createElement('div');tp.className='panel';
