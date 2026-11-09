@@ -291,7 +291,30 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .ag{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .ai small{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6;margin-bottom:3px}
 .ai span{font-size:13px;line-height:1.4}
-@media(max-width:640px){.ag{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){
+  .ag{grid-template-columns:1fr 1fr}
+  .dcol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .dcol>.dcard{grid-column:1/-1}
+  .pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:2px 4px 6px}
+  .pills::-webkit-scrollbar{display:none}
+  .pill-f{flex:0 0 auto;white-space:nowrap}
+  .tbl thead{display:none}
+  .tbl tbody tr{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:2px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .tbl td{padding:0;border:0;background:none}
+  .tbl td:nth-child(1){grid-column:1;font-weight:700;font-size:14px}
+  .tbl td:nth-child(2),.tbl td:nth-child(3){font-size:12px;opacity:.85}
+  .tbl td:nth-child(4){grid-column:2;grid-row:1/4;align-self:center}
+  body.list-mode .wrap{grid-template-columns:minmax(0,1fr);width:100%;max-width:100%;padding:12px 16px}
+  body.list-mode .wrap>*{min-width:0}
+  .stats{margin-left:0;width:100%}
+  .stat{flex:1 1 calc(50% - 8px);min-width:0}
+  .dhead{flex-direction:column;align-items:stretch;min-width:0}
+  .dhead>*{min-width:0;max-width:100%}
+  .dhead .ostrip{flex:none;width:100%}
+  .ostrip{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .ocard{padding:12px;min-width:0}
+  .ocard .on2{font-size:13px}
+}
 .ostrip.one{grid-template-columns:1fr}
 .ocard{border-radius:20px;padding:14px 16px;background:var(--card);border:1px solid var(--line);cursor:pointer;border-top:4px solid var(--c)}
 .ocard.on{box-shadow:0 0 0 2px var(--c)}
@@ -865,7 +888,7 @@ function renderCols(){
     bx.append(ah,ag);tp.appendChild(bx);
   }
   tp.style.maxHeight='460px';tp.style.overflow='auto';
-  const tb=ce('table');
+  const tb=ce('table','tbl');
   tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Cấp</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
   scoped.slice().sort((x,y)=>ORGS.findIndex(o=>o.id===x.dept)-ORGS.findIndex(o=>o.id===y.dept)||(x.order||0)-(y.order||0)).forEach(a=>{
