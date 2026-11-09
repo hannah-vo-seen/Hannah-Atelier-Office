@@ -302,11 +302,17 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .ah{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .ah b{font:800 15px var(--f-d)}
 .ax{border:0;background:none;color:#8a6fd6;font:700 12px var(--f);cursor:pointer}
-.ag{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.ai small{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6;margin-bottom:3px}
+.ag{display:grid;grid-template-columns:1fr;gap:7px;max-width:520px}
+.ai{display:flex;gap:10px;align-items:baseline}
+.ai small{width:118px;flex:none;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 .ai span{font-size:13px;line-height:1.4}
+.threads{display:flex;gap:10px;padding:10px 14px;overflow-x:auto;scrollbar-width:none;border-bottom:1px dashed rgba(150,130,220,.35)}
+.threads:empty{display:none}
+.threads::-webkit-scrollbar{display:none}
+.tav{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--c);background:#fff;color:#2b2f45;font:800 13px var(--f-d);cursor:pointer;padding:0;box-shadow:0 4px 12px rgba(150,120,255,.25)}
+.tav.on{box-shadow:0 0 0 3px var(--c),0 4px 12px rgba(150,120,255,.25)}
+.tav .unr{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:10px;background:#ff3b5c;color:#fff;font:700 11px/19px var(--f);font-style:normal;text-align:center;padding:0 5px;box-shadow:0 0 0 2px #fff}
 @media(max-width:640px){
-  .ag{grid-template-columns:1fr 1fr}
   .dcol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .dcol>.dcard{grid-column:1/-1}
   .pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:2px 4px 6px}
@@ -388,7 +394,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 </div>
 
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div id="threads" class="threads"></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div>
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
@@ -946,9 +952,35 @@ $('pmOk').onclick=()=>{const v=$('pmIn').value.trim();if(v){setPass(v);closePM()
 $('pmIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('pmOk').click();});
 $('pmSkip').onclick=closePM;
 if(!pass)$('passModal').hidden=false;
-let chatA=null,chatTimer=null;
+let chatA=null,chatTimer=null,threadTimer=null;
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+let threads=LS.get('vpd-threads',[]),seen=LS.get('vpd-seen',{}),known={};
+function saveThreads(){LS.set('vpd-threads',threads);LS.set('vpd-seen',seen);}
+function initials(n){const w=n.split(' – ')[0].split(/\s+/).filter(x=>x&&x.toLowerCase()!=='of'&&x!=='&');return ((w[0]||'')[0]||'')+((w[1]||'')[0]||'');}
+function unread(id){return Math.max(0,(known[id]||0)-(seen[id]||0));}
+function touchThread(id){if(!threads.includes(id))threads.push(id);saveThreads();}
+function renderThreads(){
+  const box=$('threads');if(!box)return;box.textContent='';
+  [...new Set([...threads,chatA&&chatA.id].filter(Boolean))].forEach(id=>{
+    const a=state.agents.find(x=>x.id===id);if(!a)return;
+    const o=ORGS.find(z=>z.id===a.dept);const on=!!(chatA&&chatA.id===id);
+    const b=document.createElement('button');b.type='button';b.className='tav'+(on?' on':'');b.title=a.name;
+    b.style.setProperty('--c',o?o.c:'#8fb3ff');b.textContent=initials(a.name).toUpperCase();
+    const n=on?0:unread(id);
+    if(n>0){const i=document.createElement('i');i.className='unr';i.textContent=n>9?'9+':String(n);b.appendChild(i);}
+    b.onclick=()=>openChat(a);box.appendChild(b);
+  });
+}
+async function pollThreads(){
+  if(!pass)return;
+  for(const id of threads){
+    if(chatA&&id===chatA.id)continue;
+    try{const d=await api('/history',{agent:id});known[id]=d.history.length;if(seen[id]===undefined)seen[id]=d.history.length;}catch(e){}
+  }
+  saveThreads();renderThreads();
+}
 async function api(path,payload){
-  const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,pass,agent:chatA.id})});
+  const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,pass,agent:(payload&&payload.agent)||chatA.id})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
   return d;
@@ -956,20 +988,22 @@ async function api(path,payload){
 function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
+  known[chatA.id]=d.history.length;seen[chatA.id]=d.history.length;saveThreads();renderThreads();
   $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! '+((chatA&&chatA.greet)||('Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.'));h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
-  chatA=a;$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
+  chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';
   clearInterval(chatTimer);
   if(!pass){$('passModal').hidden=false;}
   if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
   $('chatForm').hidden=false;
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
+  pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,20000);
 }
 let sending=false;
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
-$('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);};
+$('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if(!t||!chatA||sending)return;
