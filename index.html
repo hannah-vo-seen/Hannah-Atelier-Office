@@ -182,6 +182,8 @@ body .oc.brk .sub2{color:var(--mut)}
 .pmb{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .pmb button{border:0;border-radius:999px;padding:8px 16px;font:800 13px var(--f-d);cursor:pointer;color:#fff;background:linear-gradient(90deg,#ff8fc0,#7fb2ff)}
 #pmSkip{background:rgba(255,255,255,.15)!important}
+.pill-f:not(.all)::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c,transparent);margin-right:7px;vertical-align:middle;box-shadow:0 0 6px var(--c,transparent)}
+body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 </style>
 </head>
 <body>
