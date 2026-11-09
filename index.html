@@ -252,13 +252,14 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .orow i{width:10px;height:10px;border-radius:50%}
 .orow b{font-weight:700;opacity:.8}
 .orow em{font-style:normal;font-weight:800;min-width:40px;text-align:right}
-.rings{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:16px}
+.rings{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
 .rcard{border-radius:20px;padding:14px 10px;background:var(--card);border:1px solid var(--line);text-align:center}
 .rn{font:700 13px var(--f-d);margin-top:6px}
 .rs2{font-size:12px;opacity:.75}
+.rs2 b.late{color:#e5484d;font-weight:800;opacity:1}
 #mascot{position:absolute;right:16px;bottom:72px;width:64px;height:64px;object-fit:contain;animation:bob 3s ease-in-out infinite;pointer-events:none;z-index:3;filter:drop-shadow(0 8px 14px rgba(120,100,220,.35))}
 #mascot[hidden]{display:none!important}
-@media(max-width:1000px){.dgrid{grid-template-columns:1fr}.rings{grid-template-columns:repeat(3,1fr)}.sphere{min-height:300px}.planet{width:260px;height:260px}.sphere{min-height:380px}}
+@media(max-width:1000px){.dgrid{grid-template-columns:1fr}.rings{grid-template-columns:repeat(2,1fr)}.sphere{min-height:300px}.planet{width:260px;height:260px}.sphere{min-height:380px}}
 </style>
 </head>
 <body>
@@ -308,14 +309,12 @@ import {OrbitControls} from './OrbitControls.js';
 import {RoundedBoxGeometry} from './RoundedBoxGeometry.js';
 
 const ORGS=[
-  {id:'sys',name:'Hệ thống & Dev',c:'#35d6a0'},
-  {id:'th',name:'Thiên Hà · Video',c:'#ffd25e'},
-  {id:'ops',name:'Vận hành',c:'#b58cff'},
-  {id:'bq',name:'Bách Quang Contactlens',c:'#ff7ab0'},
+  {id:'cmd',name:'Atelier Command',c:'#8fb3ff'},
+  {id:'bq',name:'Bách Quang',c:'#ff7ab0'},
   {id:'mka',name:'Asia New Vision',c:'#6ea8ff'},
   {id:'el',name:'Ember Lens',c:'#ffb36b'}
 ];
-const SUBS=['Marketing','Phân phối','Trade MKT','Dữ liệu & Báo cáo','Hỗ trợ đại lý'];
+const SUBS=['Điều hành','Giám sát','Điều phối','Chuyên môn'];
 const LABEL={ready:'Sẵn sàng',waiting:'Đang chờ',idle:'Rảnh',off:'Nghỉ',planned:'Chưa xây'};
 const STATUS_COLOR={ready:0x35d6a0,waiting:0xffd25e,idle:0x8ea0c4,off:0x8ea0c4,planned:0x8ea0c4};
 const R=9;
@@ -374,7 +373,7 @@ orbCore.position.y=2.1;hub.add(orbCore);
 
 /* beams from hub to each building */
 ORGS.forEach((o,k)=>{
-  const a=k*Math.PI/3-Math.PI/2;
+  const a=k*Math.PI*2/ORGS.length-Math.PI/2;
   const r0=2.8,r1=R-2.4,len=r1-r0,mid=(r0+r1)/2;
   const beam=new THREE.Mesh(new THREE.BoxGeometry(len,.06,.14),glow(0x8ec9ff,1));
   beam.position.set(Math.cos(a)*mid,.7,Math.sin(a)*mid);
@@ -385,7 +384,7 @@ ORGS.forEach((o,k)=>{
 /* buildings */
 const buildings={};
 ORGS.forEach((o,k)=>{
-  const a=k*Math.PI/3-Math.PI/2;
+  const a=k*Math.PI*2/ORGS.length-Math.PI/2;
   const g=new THREE.Group();
   g.position.set(R*Math.cos(a),0,R*Math.sin(a));
   g.userData={org:o.id,a};
@@ -667,7 +666,7 @@ function ringBox(parts,size,sw,center){
   w.appendChild(donutSvg(parts,sw));w.appendChild(ce('span','rv',center));return w;
 }
 function legendRow(label,v,col){const r=ce('div','lgr');const i=ce('i');i.style.background=col;r.append(i,ce('span',null,label),ce('b',null,String(v)));return r;}
-const PINS=[['16%','24%'],['50%','10%'],['84%','24%'],['16%','76%'],['50%','90%'],['84%','76%']];
+const PINS=[['20%','28%'],['80%','28%'],['20%','74%'],['80%','74%']];
 function renderCols(){
   const c=$('cols');c.textContent='';
   const all=state.agents,tasks=state.tasks||[];
@@ -726,17 +725,19 @@ function renderCols(){
 
   const rings=ce('div','rings');
   ORGS.forEach(o=>{
-    const l=all.filter(a=>a.dept===o.id),rd=l.filter(a=>a.status==='ready').length;
-    const pct=l.length?Math.round(rd/l.length*100):0;
+    const ot=tasks.filter(t=>orgOf(t)===o.id);
+    const dn=ot.filter(t=>t.status==='done').length,dg=ot.filter(t=>t.status==='doing').length,lt=ot.filter(t=>t.status==='late').length;
+    const pct=ot.length?Math.round(dn/ot.length*100):0;
     const rb=ce('div','rcard');
-    rb.append(ringBox([{v:pct,col:o.c},{v:100-pct,col:'transparent'}],84,10,pct+'%'),ce('div','rn',o.name),ce('div','rs2',rd+' / '+l.length+' sẵn sàng'));
-    rings.appendChild(rb);
+    rb.append(ringBox([{v:dn,col:C_OK},{v:dg,col:C_DO},{v:lt,col:C_LATE}],84,10,ot.length?pct+'%':'—'),ce('div','rn',o.name));
+    const sb=ce('div','rs2');sb.append(ce('span',null,dn+' xong · '+dg+' đang xử lý · '),ce('b','late',lt+' trễ hạn'));
+    rb.appendChild(sb);rings.appendChild(rb);
   });
-
+  c.appendChild(rings);
   const tp=ce('div','dcard');tp.style.marginTop='16px';
   tp.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));
   const tb=ce('table');
-  tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Phòng ban</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
+  tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Cấp</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
   scoped.slice().sort((x,y)=>ORGS.findIndex(o=>o.id===x.dept)-ORGS.findIndex(o=>o.id===y.dept)||(x.order||0)-(y.order||0)).forEach(a=>{
     const o=ORGS.find(z=>z.id===a.dept),tr=ce('tr');tr.style.cursor='pointer';tr.onclick=()=>openChat(a);
