@@ -1,13 +1,15 @@
-# Văn Phòng Đêm
+Hannah Atelier Office
 
-Văn phòng 3D ban đêm hiển thị trạng thái các agent. Chạy hoàn toàn trên trình duyệt bằng WebGL, không dùng thư viện ngoài.
+Trang tĩnh hiển thị trạng thái các agent: xem dạng văn phòng 3D hoặc dạng danh sách.
 
-Dữ liệu nằm trong `agents.json` (mẫu). Sửa `status` để đổi trạng thái: `ready`, `waiting`, `idle`, `off`, `planned`.
+Dữ liệu nằm trong agents.json. Sửa status để đổi trạng thái: ready, waiting, idle, off, planned. Trường sub là phòng ban (dùng cho Bách Quang).
 
 Chạy thử trên máy:
 
-    python3 -m http.server 8000
+python3 -m http.server 8000
 
 rồi mở http://localhost:8000
 
-Trang này không đọc dữ liệu riêng, không ghi gì ra ngoài. Không đưa token, file `.env` hay số liệu quảng cáo vào repo này.
+Thư viện Three.js (MIT, xem LICENSE) đã đi kèm trong repo, nên không cần cài thêm.
+
+Không đưa token, file .env, số liệu quảng cáo hay thông tin khách hàng vào repo này.
