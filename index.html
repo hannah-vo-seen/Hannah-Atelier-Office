@@ -276,7 +276,21 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .pin{z-index:2;font-size:14px;padding:10px 16px 10px 13px;gap:8px}
 .pin::before{width:12px;height:12px}
 .pin b{font:800 16px var(--f-d)}
-.pin.sm{font-size:11px;padding:6px 9px 6px 8px;gap:5px}
+.sphere::before{content:"";position:absolute;left:50%;top:50%;width:72%;aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(140,110,230,.4);transform:translate(-50%,-50%) rotateX(72deg);pointer-events:none;z-index:1;animation:orbit 18s linear infinite}
+@keyframes orbit{to{transform:translate(-50%,-50%) rotateX(72deg) rotate(360deg)}}
+.pin{padding:6px 16px 6px 6px;gap:10px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,255,255,.7));border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 30px -8px var(--c),inset 0 1px 0 #fff;animation:floaty 6s ease-in-out infinite;backdrop-filter:blur(12px)}
+.pin:nth-child(2){animation-delay:-1.5s}
+.pin:nth-child(3){animation-delay:-3s}
+.pin:nth-child(4){animation-delay:-4.5s}
+@keyframes floaty{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
+.pin::before{display:none}
+.pin b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,#fff 0%,var(--c) 70%);color:#fff;font:800 15px var(--f-d);text-shadow:0 1px 2px rgba(0,0,0,.25);box-shadow:0 4px 10px -2px var(--c)}
+.pin span{font:700 14px var(--f);letter-spacing:.01em}
+.pin:hover{transform:translate(-50%,-50%) scale(1.06)}
+.pin.on{box-shadow:0 0 0 2px var(--c),0 14px 34px -6px var(--c)}
+.pin.sm{font-size:11px;padding:4px 10px 4px 4px;gap:6px}
+.pin.sm b{width:26px;height:26px;font-size:12px}
+.pin.sm span{font-size:11px}
 .pin.sm::before{width:8px;height:8px}
 .pin.sm b{font-size:13px}
 .dgrid{grid-template-columns:240px 1fr}
