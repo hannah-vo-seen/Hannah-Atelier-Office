@@ -241,8 +241,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .lgr{display:flex;align-items:center;gap:8px;font-size:13px;margin:5px 0}
 .lgr i{width:10px;height:10px;border-radius:50%;flex:none}
 .lgr b{margin-left:auto}
-.sphere{position:relative;min-height:360px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.9),rgba(230,224,255,.45) 60%,transparent 78%)}
-.planet{width:230px;height:230px;object-fit:contain;animation:bob 6s ease-in-out infinite;filter:drop-shadow(0 18px 30px rgba(120,100,220,.3))}
+.sphere{position:relative;min-height:480px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.9),rgba(230,224,255,.45) 60%,transparent 78%)}
+.planet{width:min(400px,80%);height:min(400px,80%);object-fit:contain;animation:bob 6s ease-in-out infinite;filter:drop-shadow(0 18px 30px rgba(120,100,220,.3))}
 .pin{position:absolute;transform:translate(-50%,-50%);border:0;border-radius:999px;padding:6px 12px 6px 9px;background:#fff;color:#2b2f45;font:600 12px var(--f);box-shadow:0 6px 16px rgba(120,100,200,.22);cursor:pointer;display:flex;gap:6px;align-items:center;white-space:nowrap}
 .pin::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
 .pin b{font:800 13px var(--f-d);color:#2b2f45}
@@ -258,7 +258,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .rs2{font-size:12px;opacity:.75}
 #mascot{position:absolute;right:16px;bottom:72px;width:64px;height:64px;object-fit:contain;animation:bob 3s ease-in-out infinite;pointer-events:none;z-index:3;filter:drop-shadow(0 8px 14px rgba(120,100,220,.35))}
 #mascot[hidden]{display:none!important}
-@media(max-width:1000px){.dgrid{grid-template-columns:1fr}.rings{grid-template-columns:repeat(3,1fr)}.sphere{min-height:300px}.planet{width:180px;height:180px}}
+@media(max-width:1000px){.dgrid{grid-template-columns:1fr}.rings{grid-template-columns:repeat(3,1fr)}.sphere{min-height:300px}.planet{width:260px;height:260px}.sphere{min-height:380px}}
 </style>
 </head>
 <body>
@@ -688,7 +688,6 @@ function renderCols(){
 
   const pills=ce('div','pills');
   const mkp=(label,id,col)=>{const b=ce('button','pill-f'+(listOrg===id?' on':'')+(id?'':' all'),label);if(col)b.style.setProperty('--c',col);b.onclick=()=>{listOrg=id;renderCols()};pills.appendChild(b)};
-  mkp('Tất cả',null);ORGS.forEach(o=>mkp(o.name,o.id,o.c));c.appendChild(pills);
 
   const g=ce('div','dgrid');
   const L=ce('div','dcol');
@@ -733,7 +732,6 @@ function renderCols(){
     rb.append(ringBox([{v:pct,col:o.c},{v:100-pct,col:'transparent'}],84,10,pct+'%'),ce('div','rn',o.name),ce('div','rs2',rd+' / '+l.length+' sẵn sàng'));
     rings.appendChild(rb);
   });
-  c.appendChild(rings);
 
   const tp=ce('div','dcard');tp.style.marginTop='16px';
   tp.appendChild(ce('div','ct','Danh sách agent'+(org?' · '+org.name:'')));
