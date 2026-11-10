@@ -212,6 +212,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat input,#chat textarea{background:#fff;border:1px solid #e3dcff;color:#2b2f45;border-radius:999px}
 #chat input::placeholder,#chat textarea::placeholder{color:#a79fcf}
 #chat form{align-items:flex-end}
+#chat .note .pf{cursor:pointer;padding:2px 0;word-break:break-all}
+#chat .note .pf:hover{text-decoration:line-through}
 #chat textarea{flex:1;resize:none;max-height:120px;overflow-y:auto;line-height:1.4;padding:9px 14px;font:14px var(--f);box-sizing:border-box;min-width:0}
 #chat form button{background:linear-gradient(90deg,#ffb3d9,#b9c8ff);color:#fff;box-shadow:0 6px 14px rgba(255,160,210,.35)}
 .charts{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}
@@ -1269,7 +1271,7 @@ $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
 let pendingFiles=[];
 const readFile=f=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]});fr.onerror=rej;fr.readAsDataURL(f);});
-const showPending=()=>{$('chatNote').textContent=pendingFiles.length?'📎 '+pendingFiles.length+' file: '+pendingFiles.map(f=>f.name).join(', ')+' (chạm để bỏ)':'';};
+const showPending=()=>{const n=$('chatNote');n.textContent='';pendingFiles.forEach((f,i)=>{const r=document.createElement('div');r.className='pf';r.textContent='📎 '+f.name+'  ✕';r.title='Chạm để bỏ file này';r.onclick=()=>{if(sending)return;pendingFiles.splice(i,1);showPending();};n.appendChild(r);});};
 $('chatFile').onchange=async e=>{
   const list=[...(e.target.files||[])];e.target.value='';
   if(!list.length)return;
@@ -1278,7 +1280,6 @@ $('chatFile').onchange=async e=>{
   for(const f of list){pendingFiles.push(await readFile(f));}
   showPending();
 };
-$('chatNote').onclick=()=>{if(pendingFiles.length&&!sending){pendingFiles=[];showPending();}};
 function askConfirm(title,sub){
   return new Promise(res=>{
     const bg=document.createElement('div');bg.className='cf-bg';
