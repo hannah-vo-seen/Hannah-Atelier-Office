@@ -1289,8 +1289,23 @@ function dropThread(id){
   if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);}
   renderThreads();
 }
+async function checkInbox(){
+  try{
+    const since=LS.get('vpd-inbox',null);
+    const d=await fetch(WORKER_URL+'/inbox?after='+(since||0),{cache:'no-store'}).then(r=>r.json());
+    if(since===null){LS.set('vpd-inbox',Date.now());return;}
+    let mx=since,ch=false;
+    (d.items||[]).forEach(x=>{
+      if(!threads.includes(x.agent)){threads.push(x.agent);if(seen[x.agent]===undefined)seen[x.agent]=Math.max(0,(x.n||1)-1);ch=true;}
+      mx=Math.max(mx,x.ms||0);
+    });
+    if(mx>since)LS.set('vpd-inbox',mx);
+    if(ch){saveThreads();renderThreads();}
+  }catch(e){}
+}
 async function pollThreads(){
   if(!pass)return;
+  await checkInbox();
   for(const id of threads){
     if(chatA&&id===chatA.id)continue;
     try{const d=await api('/history',{agent:id});known[id]=replyCount(d.history);if(seen[id]===undefined)seen[id]=replyCount(d.history);}catch(e){}
