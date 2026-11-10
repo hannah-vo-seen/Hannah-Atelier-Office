@@ -475,7 +475,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .cf-yes{background:#ff5c7a;color:#fff}
 
 .m.b{position:relative;padding-bottom:20px}
-.m .gl{position:absolute;right:8px;bottom:4px;line-height:0;opacity:.3;filter:grayscale(1);transition:opacity .4s,filter .4s}
+.m .gl{position:absolute;right:8px;bottom:4px;line-height:0}
 .m .gl img{width:14px;height:14px;display:block;border-radius:50%}
 .m .gl.on{opacity:1;filter:none}
 </style>
@@ -1225,17 +1225,19 @@ async function api(path,payload){
   if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
   return d;
 }
-function bubble(text,mine,unread){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';const gl=document.createElement('span');gl.className='gl'+(unread?'':' on');const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
+const READ_KEY='vpd-read';
+function readSet(id){try{return new Set((JSON.parse(localStorage.getItem(READ_KEY)||'{}')[id])||[]);}catch(_){return new Set();}}
+function markRead(id,i){try{const o=JSON.parse(localStorage.getItem(READ_KEY)||'{}');const arr=new Set(o[id]||[]);arr.add(i);o[id]=[...arr].slice(-300);localStorage.setItem(READ_KEY,JSON.stringify(o));}catch(_){}}
+function addPlanet(d){const gl=document.createElement('span');gl.className='gl on';const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);}
+function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
   const total=replyCount(d.history);
-  const prev=seen[chatA.id]===undefined?total:seen[chatA.id];
+  known[chatA.id]=total;seen[chatA.id]=total;saveThreads();renderThreads();
   $('chatLog').textContent='';
   if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! '+((chatA&&chatA.greet)||('Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.'));h.append(im,t);$('chatLog').appendChild(h);}
-  let k=0;
-  d.history.forEach(m=>{if(m.role==='assistant')k++;bubble(m.content,m.role==='user',m.role==='assistant'&&k>prev);});
-  known[chatA.id]=total;seen[chatA.id]=total;saveThreads();renderThreads();
-  setTimeout(()=>document.querySelectorAll('#chatLog .gl:not(.on)').forEach(g=>g.classList.add('on')),1500);
+  const rs=readSet(chatA.id);
+  d.history.forEach((m,i)=>bubble(m.content,m.role==='user',i,rs.has(i)));
 }
 function openChat(a){
   if(infoAgent){infoAgent=null;renderCols();}
@@ -1294,7 +1296,7 @@ $('chatForm').onsubmit=async e=>{
   $('chatIn').value='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
-    const d=await api('/chat',{message:t,files});bubble(d.answer,false);
+    const d=await api('/chat',{message:t,files});await loadHist();
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
