@@ -519,7 +519,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 
 <details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" hidden></label><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><input id="chatIn" placeholder="Nhắn cho agent..." autocomplete="off"><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
 (function(){
   var box=document.getElementById('intro');
@@ -1231,25 +1231,27 @@ function openChat(a){
 }
 let sending=false;
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
-let pendingFile=null;
-$('chatFile').onchange=e=>{
-  const f=e.target.files&&e.target.files[0];e.target.value='';
-  if(!f)return;
-  if(f.size>22*1024*1024){$('chatNote').textContent='File quá 22MB, chị chọn file nhỏ hơn.';return;}
-  const fr=new FileReader();
-  fr.onload=()=>{pendingFile={name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]};$('chatNote').textContent='📎 '+f.name+' (chạm vào đây để bỏ)';};
-  fr.readAsDataURL(f);
+let pendingFiles=[];
+const readFile=f=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]});fr.onerror=rej;fr.readAsDataURL(f);});
+const showPending=()=>{$('chatNote').textContent=pendingFiles.length?'📎 '+pendingFiles.length+' file: '+pendingFiles.map(f=>f.name).join(', ')+' (chạm để bỏ)':'';};
+$('chatFile').onchange=async e=>{
+  const list=[...(e.target.files||[])];e.target.value='';
+  if(!list.length)return;
+  const total=list.reduce((n,f)=>n+f.size,0)+pendingFiles.reduce((n,f)=>n+f.data.length*0.75,0);
+  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, chị bớt bớt file nhé.';return;}
+  for(const f of list){pendingFiles.push(await readFile(f));}
+  showPending();
 };
-$('chatNote').onclick=()=>{if(pendingFile&&!sending){pendingFile=null;$('chatNote').textContent='';}};
+$('chatNote').onclick=()=>{if(pendingFiles.length&&!sending){pendingFiles=[];showPending();}};
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
-  const t=$('chatIn').value.trim();if((!t&&!pendingFile)||!chatA||sending)return;
-  const file=pendingFile;pendingFile=null;
-  $('chatIn').value='';bubble(t||('📎 '+file.name),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA||sending)return;
+  const files=pendingFiles;pendingFiles=[];showPending();
+  $('chatIn').value='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
-    const d=await api('/chat',{message:t,file});bubble(d.answer,false);
+    const d=await api('/chat',{message:t,files});bubble(d.answer,false);
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
