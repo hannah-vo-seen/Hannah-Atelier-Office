@@ -223,10 +223,11 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat .m.u .q b{color:#fff}
 #chat .m.hl{outline:2px solid #b99cff;outline-offset:2px}
 #replyBar b{display:block;font-size:12px}
-#replyBar{margin:0 12px 6px;padding:6px 10px;border-left:3px solid #b99cff;background:rgba(185,156,255,.16);border-radius:10px;font-size:12px;color:#4a3f8a;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#replyBar{margin:0 96px 6px 12px;padding:6px 10px;border-left:3px solid #b99cff;background:rgba(185,156,255,.16);border-radius:10px;font-size:12px;color:#4a3f8a;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #replyBar[hidden]{display:none}
 #replyBar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-#replyBar button{border:0;background:none;cursor:pointer;color:#8a6fd6;font-weight:700;flex:none}
+#replyBar button{border:0;background:rgba(138,111,214,.18);cursor:pointer;color:#5b3fc0;font-weight:700;flex:none;font-size:12px;padding:4px 10px;border-radius:999px}
+#replyBar button:hover{background:rgba(138,111,214,.32)}
 #chat .note .pf{cursor:pointer;padding:2px 0;word-break:break-all}
 #chat .note .pf:hover{text-decoration:line-through}
 #chat textarea{flex:1;resize:none;max-height:120px;overflow-y:auto;line-height:1.4;padding:9px 14px;font:14px var(--f);box-sizing:border-box;min-width:0}
@@ -296,11 +297,13 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat header .ava{cursor:pointer}
 #chat form button{flex:none;height:40px;padding:0 18px}
 #chat form .attach{height:40px;width:40px;flex:none;box-sizing:border-box}
-#chat.big form{padding-right:96px}
+#chat.big form{padding-right:16px}
+#chat.big ~ .heads{}
+#chat.big #replyBar{margin-right:12px}
 #chatBack{position:fixed;inset:0;z-index:19;background:rgba(20,14,40,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none}
 #chatBack.on{display:block}
-#chat.big{width:calc(100vw - 40px);max-width:1400px;height:calc(100vh - 40px);bottom:20px;right:auto;left:50%;transform:translateX(-50%)}
-@media (max-width:640px){#chat.big{width:calc(100vw - 16px);height:calc(100vh - 16px);bottom:8px}}
+#chat.big{left:16px;right:auto;width:calc(100vw - 130px);height:calc(100vh - 40px);bottom:20px;transform:none}
+@media (max-width:640px){#chat.big{left:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);bottom:8px}}
 .sphere{min-height:480px;padding:0}
 .planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
 .planetbox .bubble{height:92%;width:auto;max-width:92%;aspect-ratio:1;object-fit:contain;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
@@ -1257,7 +1260,7 @@ function readSet(id){try{return new Set((JSON.parse(localStorage.getItem(READ_KE
 function markRead(id,i){try{const o=JSON.parse(localStorage.getItem(READ_KEY)||'{}');const arr=new Set(o[id]||[]);arr.add(i);o[id]=[...arr].slice(-300);localStorage.setItem(READ_KEY,JSON.stringify(o));}catch(_){}}
 function addPlanet(d){const gl=document.createElement('span');gl.className='gl on';const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);}
 let replyTo=null;
-const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='✕';x.title='Bỏ trả lời';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
+const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='Huỷ trả lời';x.title='Bỏ trả lời (Esc)';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
 const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,200)}]]\n${t}`;
 const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
 const jumpTo=(snip)=>{const norm=x=>String(x).replace(/\s+/g,' ').trim();const key=norm(snip).slice(0,30);const hit=[...$('chatLog').querySelectorAll('.m.b')].find(x=>norm(x.textContent).includes(key));if(!hit)return;hit.scrollIntoView({block:'center',behavior:'smooth'});hit.classList.add('hl');setTimeout(()=>hit.classList.remove('hl'),1500);};
@@ -1336,7 +1339,7 @@ $('chatWipe').onclick=async()=>{
   }catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
 };
 $('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
-$('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}});
+$('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
 $('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
