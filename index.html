@@ -1225,7 +1225,7 @@ async function api(path,payload){
   if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
   return d;
 }
-function bubble(text,mine,unread){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';const gl=document.createElement('span');gl.className='gl'+(unread?'':' on');const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
+function bubble(text,mine,unread){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';const gl=document.createElement('span');gl.className='gl'+(unread?'':' on');const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
   const total=replyCount(d.history);
@@ -1250,6 +1250,7 @@ function openChat(a){
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
 let sending=false;
+$('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
 let pendingFiles=[];
 const readFile=f=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]});fr.onerror=rej;fr.readAsDataURL(f);});
