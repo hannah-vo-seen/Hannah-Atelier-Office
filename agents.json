@@ -5,7 +5,7 @@
       "dept": "cmd",
       "sub": "Điều hành",
       "order": 1,
-      "name": "Chief of Staff",
+      "name": "Nova",
       "role": "Đầu mối duy nhất với Hannah; nhận việc, phân loại và điều phối các agent",
       "greet": "Chị muốn giao việc gì? Em sẽ phân loại và chuyển đúng agent.",
       "status": "ready"
@@ -46,7 +46,7 @@
       "sub": "Điều hành",
       "order": 5,
       "name": "Quality Control",
-      "role": "Kiểm tra chất lượng trước khi việc lên Chief of Staff",
+      "role": "Kiểm tra chất lượng trước khi việc lên Nova",
       "greet": "Chị gửi sản phẩm cần kiểm tra, em xem chất lượng cho chị.",
       "status": "ready"
     },
@@ -56,7 +56,7 @@
       "sub": "Điều hành",
       "order": 6,
       "name": "System Monitor",
-      "role": "Theo dõi hệ thống và báo cáo cho Chief of Staff",
+      "role": "Theo dõi hệ thống và báo cáo cho Nova",
       "greet": "Chị muốn hỏi tình trạng hệ thống nào ạ?",
       "status": "ready"
     },
