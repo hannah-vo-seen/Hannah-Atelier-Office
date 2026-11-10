@@ -216,6 +216,13 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatMenu[hidden]{display:none}
 #chatMenu button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 12px;color:#ff5c7a;font:700 13px var(--f);cursor:pointer;border-radius:8px;white-space:nowrap}
 #chatMenu button:hover{background:#fff0f4}
+#chat .m .q{border-left:3px solid #8a6fd6;background:rgba(138,111,214,.12);border-radius:8px;padding:5px 8px;margin-bottom:6px;cursor:pointer}
+#chat .m .q b{display:block;font-size:12px;color:#6b4fd0}
+#chat .m .q span{display:block;font-size:12px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chat .m.u .q{border-left-color:#fff;background:rgba(255,255,255,.22)}
+#chat .m.u .q b{color:#fff}
+#chat .m.hl{outline:2px solid #b99cff;outline-offset:2px}
+#replyBar b{display:block;font-size:12px}
 #replyBar{margin:0 12px 6px;padding:6px 10px;border-left:3px solid #b99cff;background:rgba(185,156,255,.16);border-radius:10px;font-size:12px;color:#4a3f8a;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #replyBar[hidden]{display:none}
 #replyBar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
@@ -1250,10 +1257,13 @@ function readSet(id){try{return new Set((JSON.parse(localStorage.getItem(READ_KE
 function markRead(id,i){try{const o=JSON.parse(localStorage.getItem(READ_KEY)||'{}');const arr=new Set(o[id]||[]);arr.add(i);o[id]=[...arr].slice(-300);localStorage.setItem(READ_KEY,JSON.stringify(o));}catch(_){}}
 function addPlanet(d){const gl=document.createElement('span');gl.className='gl on';const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);}
 let replyTo=null;
-const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const sp=document.createElement('span');sp.textContent='↪ '+replyTo.slice(0,140);const x=document.createElement('button');x.type='button';x.textContent='✕';x.title='Bỏ trả lời';x.onclick=()=>{replyTo=null;showReply();};b.append(sp,x);};
+const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='✕';x.title='Bỏ trả lời';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
+const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,200)}]]\n${t}`;
+const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
+const jumpTo=(snip)=>{const norm=x=>String(x).replace(/\s+/g,' ').trim();const key=norm(snip).slice(0,30);const hit=[...$('chatLog').querySelectorAll('.m.b')].find(x=>norm(x.textContent).includes(key));if(!hit)return;hit.scrollIntoView({block:'center',behavior:'smooth'});hit.classList.add('hl');setTimeout(()=>hit.classList.remove('hl'),1500);};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
-function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine)d.textContent=text;else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo=text;showReply();$('chatIn').focus();});
+function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine)renderMine(d,text);else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}}
 let lastSig={};
 async function loadHist(){
@@ -1332,10 +1342,11 @@ $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA||sending)return;
   const files=pendingFiles;pendingFiles=[];showPending();
-  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  const encSend=replyTo?encodeReply(replyTo,t):t;
+  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
-    const sendTxt=replyTo?('Trả lời tin: "'+replyTo.slice(0,400)+'"\n\n'+t):t;replyTo=null;showReply();
+    const sendTxt=encSend;replyTo=null;showReply();
     const d=await api('/chat',{message:sendTxt,files});await loadHist();
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
