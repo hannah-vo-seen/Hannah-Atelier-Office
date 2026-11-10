@@ -475,7 +475,8 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .cf-yes{background:#ff5c7a;color:#fff}
 
 .m.b{position:relative;padding-bottom:20px}
-.m .gl{position:absolute;right:8px;bottom:4px;font-size:11px;line-height:1;opacity:.3;filter:grayscale(1);transition:opacity .4s,filter .4s}
+.m .gl{position:absolute;right:8px;bottom:4px;line-height:0;opacity:.3;filter:grayscale(1);transition:opacity .4s,filter .4s}
+.m .gl img{width:14px;height:14px;display:block;border-radius:50%}
 .m .gl.on{opacity:1;filter:none}
 </style>
 </head>
@@ -1224,7 +1225,7 @@ async function api(path,payload){
   if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
   return d;
 }
-function bubble(text,mine,unread){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';const gl=document.createElement('span');gl.className='gl'+(unread?'':' on');gl.textContent='🌐';d.appendChild(gl);w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
+function bubble(text,mine,unread){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';const gl=document.createElement('span');gl.className='gl'+(unread?'':' on');const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
   const total=replyCount(d.history);
