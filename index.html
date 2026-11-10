@@ -542,9 +542,21 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
   #chatForm{padding-bottom:max(8px,env(safe-area-inset-bottom))}
 }
 @media all and (display-mode:standalone){#chatLog,#chatIn{-webkit-user-select:text;user-select:text}}
+/* Màn hình chờ khi mở app: hiện ảnh nền một lần mỗi phiên, rồi mờ dần */
+#splash{position:fixed;inset:0;z-index:9999;background:#f7f5fd url(app-bg.jpg) center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12vh;transition:opacity .6s ease}
+#splash.off{opacity:0;pointer-events:none}
+#splash span{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 14px rgba(90,60,160,.55);letter-spacing:.3px}
 </style>
 </head>
 <body>
+<div id="splash"><span>Hannah Atelier Office</span></div>
+<script>
+(function(){try{if(sessionStorage.getItem('splashed')){document.getElementById('splash').remove();return;}sessionStorage.setItem('splashed','1');}catch(e){}
+  const sp=document.getElementById('splash');
+  setTimeout(()=>sp.classList.add('off'),1400);
+  setTimeout(()=>sp.remove(),2100);
+})();
+</script>
 <div id="intro" aria-hidden="true">
   <div class="in-neb" style="left:-120px;top:-80px;width:340px;height:300px;background:#6a3fe0"></div>
   <div class="in-neb" style="right:-120px;top:55%;width:320px;height:300px;background:#ff7ab0;opacity:.25"></div>
