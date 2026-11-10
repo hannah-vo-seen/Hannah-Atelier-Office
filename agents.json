@@ -155,7 +155,7 @@
       "dept": "bq",
       "sub": "Chuyên môn",
       "order": 9,
-      "name": "Kế hoạch",
+      "name": "Planning",
       "role": "Lập kế hoạch marketing: mục tiêu, chiến dịch, lịch, gợi ý chia ngân sách. Làm việc: đọc dữ liệu được giao, trả lời nháp trong câu trả lời, ghi rõ nguồn. Việc cần đăng, chi tiền, sửa quảng cáo hay gửi tin: chỉ viết nháp và ghi 'cần Hannah duyệt'. Chỉ phân tích khi đủ mẫu (tối thiểu 5.000 lượt hiển thị và 30 kết quả). Không đủ mẫu: ghi đúng \"Hôm nay chưa có đề xuất đủ dữ liệu.\" Đề xuất giả thuyết phải ghi cỡ mẫu. Không đề xuất đổi ngân sách hay cài đặt.",
       "greet": "Hannah muốn em lập kế hoạch gì cho Bách Quang ạ?",
       "status": "ready",
