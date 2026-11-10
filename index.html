@@ -1254,9 +1254,10 @@ async function loadHist(){
   d.history.forEach((m,i)=>bubble(m.content,m.role==='user',i,rs.has(i)));
   log.scrollTop=(first||wasBottom)?1e9:prevTop;
 }
+const drafts={};
 function openChat(a){
   if(infoAgent){infoAgent=null;renderCols();}
-  chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];
+  chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];$('chatIn').value=drafts[a.id]||'';$('chatIn').style.height='';pendingFiles=[];showPending();
   clearInterval(chatTimer);
   if(!pass){$('passModal').hidden=false;}
   if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
@@ -1304,12 +1305,12 @@ $('chatWipe').onclick=async()=>{
 };
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}});
-$('chatIn').addEventListener('input',()=>{const t=$('chatIn');t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
+$('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA||sending)return;
   const files=pendingFiles;pendingFiles=[];showPending();
-  $('chatIn').value='';$('chatIn').style.height='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
     const d=await api('/chat',{message:t,files});await loadHist();
