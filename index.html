@@ -1211,7 +1211,7 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
 // Số liệu việc từ Worker (chỉ đếm, không có tên việc)
-fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;renderStats();renderCols();}}).catch(()=>{});
+setTimeout(()=>{fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;renderStats();renderCols();}}).catch(()=>{});},0);
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
