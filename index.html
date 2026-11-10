@@ -528,6 +528,8 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 @media (max-width:640px){#chat,#chat.big{background:#f7f5fd!important;opacity:1!important;top:0!important;bottom:0!important;left:0!important;right:0!important;height:100vh!important;height:100dvh!important;border-radius:0!important;border-width:0!important}}
 /* Điện thoại: khung chat đã phủ kín màn hình nên ẩn nút phóng to */
 @media (max-width:640px){#chatZoom{display:none!important}}
+/* iPhone tự phóng to màn hình khi ô nhập có cỡ chữ dưới 16px: đặt 16px để không bị zoom */
+@media (max-width:640px){#chatIn{font-size:16px!important}}
 </style>
 </head>
 <body>
