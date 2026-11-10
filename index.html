@@ -516,6 +516,8 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .m .gl img{width:14px;height:14px;display:block;border-radius:50%}
 .m .gl.on{opacity:1;filter:none}
 html.typing *{animation-play-state:paused!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Điện thoại: khung chat phóng to phải phủ kín màn hình, không bị kéo lệch */
+@media (max-width:640px){#chat.big{position:fixed!important;top:8px!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;transform:none!important;z-index:60!important}}
 </style>
 </head>
 <body>
