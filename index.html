@@ -1378,6 +1378,18 @@ $('chatFile').onchange=async e=>{
   for(const f of list){pendingFiles.push(await readFile(f));}
   showPending();
 };
+document.addEventListener('paste',async e=>{
+  const fl=[...((e.clipboardData&&e.clipboardData.files)||[])].filter(f=>/^(image\/|application\/pdf)/.test(f.type));
+  if(!fl.length||!chatA||$('chat').hidden||sending)return;
+  e.preventDefault();
+  const total=fl.reduce((n,f)=>n+f.size,0)+pendingFiles.reduce((n,f)=>n+f.data.length*0.75,0);
+  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, chị bớt bớt file nhé.';return;}
+  for(const f of fl){
+    const named=(f.name&&f.name!=='image.png')?f:new File([f],'anh-chup-'+Date.now()+'.png',{type:f.type});
+    pendingFiles.push(await readFile(named));
+  }
+  showPending();
+});
 function askConfirm(title,sub){
   return new Promise(res=>{
     const bg=document.createElement('div');bg.className='cf-bg';
