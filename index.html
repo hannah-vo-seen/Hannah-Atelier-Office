@@ -1419,7 +1419,8 @@ $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.i
 $('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
-  const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA||sending)return;
+  const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA)return;
+  if(sending){$('chatNote').textContent='⏳ Agent đang trả lời. Tin của chị vẫn ở ô nhập, bấm Enter lại khi xong nhé.';return;}
   const files=pendingFiles;pendingFiles=[];showPending();
   const encSend=replyTo?encodeReply(replyTo,t):t;
   $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
@@ -1427,7 +1428,7 @@ $('chatForm').onsubmit=async e=>{
   try{
     const sendTxt=encSend;replyTo=null;showReply();
     $('chatLog').scrollTop=1e9;
-    const d=await api('/chat',{message:sendTxt,files});await loadHist();
+    const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, chị thử gửi lại nhé')),150000))]);await loadHist();
     $('chatLog').scrollTop=1e9;
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
