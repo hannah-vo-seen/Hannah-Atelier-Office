@@ -402,7 +402,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .bitem{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.55);margin-bottom:8px;font-size:13px}
 body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .bitem small{display:block;opacity:.7;margin-top:3px;font-size:12px}
-.bcol,.bitem{min-width:0}.bcol{overflow:hidden}.bitem{overflow-wrap:anywhere;word-break:break-word}
+.bcol,.bitem{min-width:0}.bcol{overflow-y:auto;max-height:340px}.dcard.sphere:has(.gcard) .pin:not(.on){display:none!important}.dcard.sphere .gcard{z-index:5!important}.bitem{overflow-wrap:anywhere;word-break:break-word}
 @media(max-width:1000px){.ostrip{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}}
 #chat header #chatTitle{flex:1;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 #chat header #chatClose{flex:none;white-space:nowrap;margin-left:8px}
@@ -439,7 +439,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .gcard h4{font:800 20px var(--f-d);margin:0;padding-right:22px}
 .gcard p{margin:8px 0 0;font-size:13px;line-height:1.5;opacity:.85}
 .gcard .gx{position:absolute;top:8px;right:10px;border:0;background:none;color:inherit;cursor:pointer;font-size:16px;opacity:.7}
-@media(max-width:640px){body{overflow-x:hidden}.dcard.sphere{height:auto!important;min-height:300px!important;padding:0!important;overflow:hidden}.planetbox{position:relative!important;inset:auto!important;height:260px;width:100%!important;display:block}.heads{position:static!important;top:auto!important;right:auto!important;bottom:auto!important;flex-direction:row;flex-wrap:wrap;justify-content:center;padding:6px 16px 24px;gap:12px}.dcard.sphere .gcard.r{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;transform:none!important;width:auto!important;margin:12px 12px 14px!important}.gcard.l{display:none}.gcard.r{transform:none;top:auto}.hud,.cnr{display:none}.dcard.sphere .pin{font-size:11px;padding:3px 9px 3px 3px;gap:6px}.dcard.sphere .pin b{width:22px;height:22px;font-size:11px}.dcard.sphere .pin span{font-size:11px}.planetbox{overflow:hidden!important}.planetbox canvas{width:100%!important;max-width:100%!important;height:260px!important;left:0!important;right:auto!important;transform:none!important;display:block}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
+@media(max-width:640px){body{overflow-x:hidden}.dcard.sphere{height:auto!important;min-height:300px!important;padding:0!important;overflow:hidden}.planetbox{position:relative!important;inset:auto!important;height:260px;width:100%!important;display:block}.heads{position:static!important;top:auto!important;right:auto!important;bottom:auto!important;flex-direction:row;flex-wrap:wrap;justify-content:center;padding:6px 16px 24px;gap:12px}.dcard.sphere .gcard.r{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;transform:none!important;width:auto!important;margin:12px 12px 14px!important}.gcard.l{display:none}.gcard.r{transform:none;top:auto}.hud,.cnr{display:none}.dcard.sphere .pin{font-size:11px;padding:3px 9px 3px 3px;gap:6px}.dcard.sphere .pin b{width:22px;height:22px;font-size:11px}.dcard.sphere .pin span{font-size:11px}.dcard.sphere{display:block!important;grid-template-columns:none!important}.planetbox{flex:none!important;min-width:100%!important;overflow:hidden!important}.planetbox canvas{width:100%!important;max-width:100%!important;height:260px!important;left:0!important;right:auto!important;transform:none!important;display:block}.sphere{min-height:300px}.gcard{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin:272px 12px 12px}}
 
 .dcard.sphere{background:radial-gradient(circle at 50% 42%,#2a1450 0%,#0e0820 58%,#06040d 100%);color:#f4f0ff;border-color:rgba(176,107,255,.45);box-shadow:inset 0 0 0 1px rgba(176,107,255,.25),0 0 40px -10px rgba(155,77,255,.7)}
 .gridbg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(176,107,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(176,107,255,.09) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);pointer-events:none}
@@ -1364,7 +1364,7 @@ function openChat(a){
   pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,10000);
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
-let sending=false;
+let sending=false;let sendQueue=[];
 $('chatZoom').onclick=()=>{const big=$('chat').classList.toggle('big');$('chatBack').classList.toggle('on',big);$('chatZoom').textContent=big?'⤡':'⤢';$('chatZoom').title=big?'Thu nhỏ':'Mở rộng';};
 $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
@@ -1416,14 +1416,24 @@ $('chatWipe').onclick=async()=>{
   }catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
 };
 $('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
+function drainQueue(){
+  if(!sendQueue.length||sending||!chatA)return;
+  const nx=sendQueue[0];
+  if(nx.agent!==chatA.id){$('chatNote').textContent='⏳ Còn '+sendQueue.length+' tin xếp hàng cho agent khác, mở lại chat đó để gửi.';return;}
+  sendQueue.shift();
+  const keep=$('chatIn').value;
+  pendingFiles=nx.files||[];$('chatIn').value=nx.txt;
+  $('chatForm').requestSubmit();
+  $('chatIn').value=keep;
+}
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
 $('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA)return;
-  if(sending){$('chatNote').textContent='⏳ Agent đang trả lời. Tin của chị vẫn ở ô nhập, bấm Enter lại khi xong nhé.';return;}
   const files=pendingFiles;pendingFiles=[];showPending();
   const encSend=replyTo?encodeReply(replyTo,t):t;
+  if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
   $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
@@ -1434,7 +1444,7 @@ $('chatForm').onsubmit=async e=>{
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
-  finally{sending=false;}
+  finally{sending=false;drainQueue();}
 };
 </script>
 </body>
