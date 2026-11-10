@@ -1416,15 +1416,24 @@ $('chatWipe').onclick=async()=>{
   }catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
 };
 $('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
-function drainQueue(){
-  if(!sendQueue.length||sending||!chatA)return;
-  const nx=sendQueue[0];
-  if(nx.agent!==chatA.id){$('chatNote').textContent='⏳ Còn '+sendQueue.length+' tin xếp hàng cho agent khác, mở lại chat đó để gửi.';return;}
-  sendQueue.shift();
-  const keep=$('chatIn').value;
-  pendingFiles=nx.files||[];$('chatIn').value=nx.txt;
-  $('chatForm').requestSubmit();
-  $('chatIn').value=keep;
+// Gửi tin xếp hàng ngầm: không cần mở lại chat của agent đó, chạy tuần tự từng tin
+let queueBusy=false;
+async function pumpQueue(){
+  if(queueBusy||sending||!sendQueue.length)return;
+  queueBusy=true;
+  const it=sendQueue.shift();
+  const onIt=!!(chatA&&chatA.id===it.agent);
+  if(onIt)$('chatNote').textContent='👾 Đang gửi tin xếp hàng ('+sendQueue.length+' tin còn lại)';
+  try{
+    await Promise.race([api('/chat',{agent:it.agent,message:it.txt,files:it.files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu')),60000))]);
+  }catch(err){
+    if(onIt)$('chatNote').textContent='😱 Tin xếp hàng lỗi: '+err.message;
+  }
+  queueBusy=false;
+  if(onIt){await loadHist().catch(()=>{});}
+  else{pollThreads().catch(()=>{});}
+  if(sendQueue.length)pumpQueue();
+  else if(onIt)$('chatNote').textContent='🔥 Xong';
 }
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
 $('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
@@ -1434,6 +1443,7 @@ $('chatForm').onsubmit=async e=>{
   const files=pendingFiles;pendingFiles=[];showPending();
   const encSend=replyTo?encodeReply(replyTo,t):t;
   if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
+  if(queueBusy){sendQueue.push({agent:chatA.id,txt:encSend,files});$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
   $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
@@ -1444,7 +1454,7 @@ $('chatForm').onsubmit=async e=>{
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
-  finally{sending=false;drainQueue();}
+  finally{sending=false;pumpQueue();}
 };
 </script>
 </body>
