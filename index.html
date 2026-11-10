@@ -1463,11 +1463,11 @@ let mIdx=0;
 function mHighlight(i){const bs=[...mBox.children];if(!bs.length)return;mIdx=(i+bs.length)%bs.length;bs.forEach((b,k)=>{b.classList.toggle('on',k===mIdx);if(k===mIdx)b.scrollIntoView({block:'nearest'});});}
 const orgNameOf=dept=>((ORGS.find(o=>o.id===dept)||{}).name)||'';
 const agentLabel=a=>a.name+' - '+orgNameOf(a.dept);
-// Chỉ gợi ý agent cùng brand với agent đang chat (agent Điều hành thì thấy tất cả)
+// Chỉ gợi ý agent cùng brand với agent đang chat (chat với agent Điều hành thì thấy tất cả)
 function scopeAgents(){
   const all=(state.agents||[]).filter(a=>a&&a.name);
   if(!chatA||!chatA.dept||chatA.dept==='cmd')return all;
-  return all.filter(a=>a.dept===chatA.dept||a.dept==='cmd');
+  return all.filter(a=>a.dept===chatA.dept);
 }
 function findMention(t){
   if(!t||t[0]!=='@')return null;
