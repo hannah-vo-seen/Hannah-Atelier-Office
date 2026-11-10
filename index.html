@@ -212,6 +212,10 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chat input,#chat textarea{background:#fff;border:1px solid #e3dcff;color:#2b2f45;border-radius:999px}
 #chat input::placeholder,#chat textarea::placeholder{color:#a79fcf}
 #chat form{align-items:flex-end}
+#replyBar{margin:0 12px 6px;padding:6px 10px;border-left:3px solid #b99cff;background:rgba(185,156,255,.16);border-radius:10px;font-size:12px;color:#4a3f8a;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#replyBar[hidden]{display:none}
+#replyBar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#replyBar button{border:0;background:none;cursor:pointer;color:#8a6fd6;font-weight:700;flex:none}
 #chat .note .pf{cursor:pointer;padding:2px 0;word-break:break-all}
 #chat .note .pf:hover{text-decoration:line-through}
 #chat textarea{flex:1;resize:none;max-height:120px;overflow-y:auto;line-height:1.4;padding:9px 14px;font:14px var(--f);box-sizing:border-box;min-width:0}
@@ -544,7 +548,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 
 <details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chatBack"></div><div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatZoom" type="button" title="Mở rộng" style="margin-right:6px;font-size:16px;line-height:1">⤢</button><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này" style="margin-right:6px;color:#ff5c7a">Xoá</button><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
+<div id="chatBack"></div><div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatZoom" type="button" title="Mở rộng" style="margin-right:6px;font-size:16px;line-height:1">⤢</button><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này" style="margin-right:6px;color:#ff5c7a">Xoá</button><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><div id="replyBar" hidden></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
 (function(){
   var box=document.getElementById('intro');
@@ -1241,9 +1245,12 @@ const READ_KEY='vpd-read';
 function readSet(id){try{return new Set((JSON.parse(localStorage.getItem(READ_KEY)||'{}')[id])||[]);}catch(_){return new Set();}}
 function markRead(id,i){try{const o=JSON.parse(localStorage.getItem(READ_KEY)||'{}');const arr=new Set(o[id]||[]);arr.add(i);o[id]=[...arr].slice(-300);localStorage.setItem(READ_KEY,JSON.stringify(o));}catch(_){}}
 function addPlanet(d){const gl=document.createElement('span');gl.className='gl on';const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);}
+let replyTo=null;
+const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const sp=document.createElement('span');sp.textContent='↪ '+replyTo.slice(0,140);const x=document.createElement('button');x.type='button';x.textContent='✕';x.title='Bỏ trả lời';x.onclick=()=>{replyTo=null;showReply();};b.append(sp,x);};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
-function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine)d.textContent=text;else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}}
+function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine)d.textContent=text;else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo=text;showReply();$('chatIn').focus();});
+  if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}}
 let lastSig={};
 async function loadHist(){
   const d=await api('/history',{});
@@ -1265,7 +1272,7 @@ async function loadHist(){
 const drafts={};
 function openChat(a){
   if(infoAgent){infoAgent=null;renderCols();}
-  chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];$('chatIn').value=drafts[a.id]||'';$('chatIn').style.height='';pendingFiles=[];showPending();
+  chatA=a;touchThread(a.id);renderThreads();$('chatTitle').textContent=a.name;$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];replyTo=null;showReply();$('chatIn').value=drafts[a.id]||'';$('chatIn').style.height='';pendingFiles=[];showPending();
   clearInterval(chatTimer);
   if(!pass){$('passModal').hidden=false;}
   if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
@@ -1312,7 +1319,7 @@ $('chatWipe').onclick=async()=>{
     $('chatLog').textContent='';$('chatNote').textContent='Đã xoá lịch sử và file.';
   }catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
 };
-$('chatClose').onclick=()=>{$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
+$('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}});
 $('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
 $('chatForm').onsubmit=async e=>{
@@ -1322,7 +1329,8 @@ $('chatForm').onsubmit=async e=>{
   $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(t||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
-    const d=await api('/chat',{message:t,files});await loadHist();
+    const sendTxt=replyTo?('Trả lời tin: "'+replyTo.slice(0,400)+'"\n\n'+t):t;replyTo=null;showReply();
+    const d=await api('/chat',{message:sendTxt,files});await loadHist();
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
