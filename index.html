@@ -2,7 +2,13 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f5fd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Atelier">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Hannah Atelier Office</title>
 <meta name="description" content="Thành phố agent 3D: xem trạng thái từng agent theo tổ chức và phòng ban.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hanken+Grotesk:wght@400;600&family=Orbitron:wght@700;900&family=Audiowide&display=swap">
@@ -530,6 +536,12 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 @media (max-width:640px){#chatZoom{display:none!important}}
 /* iPhone tự phóng to màn hình khi ô nhập có cỡ chữ dưới 16px: đặt 16px để không bị zoom */
 @media (max-width:640px){#chatIn{font-size:16px!important}}
+/* App trên màn hình chính (standalone): chừa vùng tai thỏ và thanh vuốt dưới, chat co theo màn hình thật */
+@media (max-width:640px){
+  #chat,#chat.big{padding-top:env(safe-area-inset-top)!important;padding-bottom:env(safe-area-inset-bottom)!important}
+  #chatForm{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+}
+@media all and (display-mode:standalone){#chatLog,#chatIn{-webkit-user-select:text;user-select:text}}
 </style>
 </head>
 <body>
