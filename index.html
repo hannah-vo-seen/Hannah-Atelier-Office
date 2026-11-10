@@ -1127,9 +1127,8 @@ function renderCols(){
     const dn=ot.filter(t=>t.status==='done').length,dg=ot.filter(t=>t.status==='doing').length,lt=ot.filter(t=>t.status==='late').length;
     const card=ce('div','ocard'+(listOrg===o.id?' on':''));card.style.setProperty('--c',o.c);
     card.append(ce('div','on2',o.name),ce('div','om',l.length+' agent · '+rd+' sẵn sàng'));
-    const bar=ce('div','ob');
-    [[dn,C_OK],[dg,C_DO],[lt,C_LATE]].forEach(([v,col])=>{if(!v)return;const seg=ce('i');seg.style.width=(v/Math.max(1,ot.length)*100)+'%';seg.style.background=col;bar.appendChild(seg);});
-    card.append(bar);
+    const sp=((state.syncPending||{})[o.id])||0;
+    const sy=ce('div','ot');sy.style.color=sp?C_LATE:C_OK;sy.textContent=sp?('Sheet: chưa khớp · '+sp+' việc chờ đồng bộ'):'Sheet: đã khớp';card.append(sy);
     const ts=ce('div','ot');ts.append(ce('span',null,dn+' xong · '+dg+' đang xử lý · '),ce('b','late',lt+' trễ hạn'));card.append(ts);
     card.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     strip.appendChild(card);
@@ -1211,7 +1210,7 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
 // Số liệu việc từ Worker (chỉ đếm, không có tên việc)
-setTimeout(()=>{fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;renderStats();renderCols();}}).catch(()=>{});},0);
+setTimeout(()=>{fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;state.syncPending=d.syncPending||{};renderStats();renderCols();}}).catch(()=>{});},0);
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
@@ -1274,7 +1273,7 @@ const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ')
 const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
 const jumpTo=(snip)=>{const norm=x=>String(x).replace(/\s+/g,' ').trim();const key=norm(snip).slice(0,30);const hit=[...$('chatLog').querySelectorAll('.m.b')].find(x=>norm(x.textContent).includes(key));if(!hit)return;hit.scrollIntoView({block:'center',behavior:'smooth'});hit.classList.add('hl');setTimeout(()=>hit.classList.remove('hl'),1500);};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmtInline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+const fmtInline=t=>esc(t).replace(/https?:\/\/[^\s<"]+/g,u=>{const m=u.match(/^(.*?)([.,;:!?)]*)$/);return '<a href="'+m[1]+'" target="_blank" rel="noopener">'+m[1]+'</a>'+m[2];}).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const fmt=s=>{const L=String(s).split('\n');let out=[],i=0;while(i<L.length){const ln=L[i];if(/^\s*\|/.test(ln)){const rows=[];while(i<L.length&&/^\s*\|/.test(L[i])){if(!/^\s*\|?\s*:?-{3,}/.test(L[i]))rows.push(L[i]);i++;}const cells=r=>r.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());out.push('<div class="tw"><table>'+rows.map((r,k)=>'<tr>'+cells(r).map(c=>k===0?'<th>'+fmtInline(c)+'</th>':'<td>'+fmtInline(c)+'</td>').join('')+'</tr>').join('')+'</table></div>');continue;}const h=ln.match(/^\s*#{1,3}\s+(.*)$/);if(h){out.push('<div class="mh">'+fmtInline(h[1])+'</div>');i++;continue;}out.push(fmtInline(ln));i++;}return out.join('<br>').replace(/(<\/div>)<br>/g,'$1');};
 function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine)renderMine(d,text);else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}}
