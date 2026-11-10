@@ -1360,7 +1360,9 @@ $('chatForm').onsubmit=async e=>{
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
     const sendTxt=encSend;replyTo=null;showReply();
+    $('chatLog').scrollTop=1e9;
     const d=await api('/chat',{message:sendTxt,files});await loadHist();
+    $('chatLog').scrollTop=1e9;
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
