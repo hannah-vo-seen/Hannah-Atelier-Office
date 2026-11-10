@@ -279,6 +279,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatInfo .ir{margin:6px 0}
 #chatInfo .ir b{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 #chat header .ava{cursor:pointer}
+#chat.big{width:min(760px,calc(100vw - 32px));height:min(88vh,900px);right:auto;left:50%;transform:translateX(-50%)}
+@media (max-width:640px){#chat.big{width:calc(100vw - 16px);height:calc(100vh - 32px);bottom:8px}}
 .sphere{min-height:480px;padding:0}
 .planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
 .planetbox .bubble{height:92%;width:auto;max-width:92%;aspect-ratio:1;object-fit:contain;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
@@ -537,7 +539,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 
 <details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
-<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này" style="margin-right:6px;color:#ff5c7a">Xoá</button><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
+<div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatZoom" type="button" title="Mở rộng" style="margin-right:6px;font-size:16px;line-height:1">⤢</button><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này" style="margin-right:6px;color:#ff5c7a">Xoá</button><button id="chatClose" type="button">Đóng</button></header><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
 (function(){
   var box=document.getElementById('intro');
@@ -1268,6 +1270,7 @@ function openChat(a){
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
 let sending=false;
+$('chatZoom').onclick=()=>{const big=$('chat').classList.toggle('big');$('chatZoom').textContent=big?'⤡':'⤢';$('chatZoom').title=big?'Thu nhỏ':'Mở rộng';};
 $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
 let pendingFiles=[];
