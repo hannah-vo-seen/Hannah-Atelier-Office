@@ -1059,7 +1059,7 @@ function renderCols(){
   const oldTp=c.querySelector('.tphead')?.parentElement;const keepTop=oldTp?oldTp.scrollTop:0;const keepWin=window.scrollY;
   c.textContent='';
   const all=state.agents,tasks=state.tasks||[];
-  const orgOf=t=>{const a=all.find(x=>x.id===t.agent);return a?a.dept:null;};
+  const orgOf=t=>{if(t.dept)return t.dept;const a=all.find(x=>x.id===t.agent);return a?a.dept:null;};
   const scoped=all.filter(a=>!listOrg||a.dept===listOrg);
   const rdy=scoped.filter(a=>a.status==='ready').length;
   const offN=scoped.filter(a=>a.status==='idle'||a.status==='off').length;
@@ -1210,6 +1210,8 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
 }).catch(()=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
+// Số liệu việc từ Worker (chỉ đếm, không có tên việc)
+fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;renderStats();renderCols();}}).catch(()=>{});
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
