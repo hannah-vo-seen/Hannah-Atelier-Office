@@ -1461,10 +1461,16 @@ $('chat').appendChild(mBox);
 const hideMention=()=>{mBox.hidden=true;};
 const orgNameOf=dept=>((ORGS.find(o=>o.id===dept)||{}).name)||'';
 const agentLabel=a=>a.name+' - '+orgNameOf(a.dept);
+// Chỉ gợi ý agent cùng brand với agent đang chat (agent Điều hành thì thấy tất cả)
+function scopeAgents(){
+  const all=(state.agents||[]).filter(a=>a&&a.name);
+  if(!chatA||!chatA.dept||chatA.dept==='cmd')return all;
+  return all.filter(a=>a.dept===chatA.dept||a.dept==='cmd');
+}
 function findMention(t){
   if(!t||t[0]!=='@')return null;
   const low=t.toLowerCase();
-  const all=(state.agents||[]).filter(a=>a&&a.name);
+  const all=scopeAgents();
   const labels=all.map(a=>({a,p:'@'+agentLabel(a).toLowerCase()})).sort((x,y)=>y.p.length-x.p.length);
   for(const x of labels){
     if(low===x.p)return {agent:x.a,rest:''};
@@ -1483,7 +1489,7 @@ $('chatIn').addEventListener('input',()=>{
   const v=$('chatIn').value;const m=v.match(/@([^@]*)$/);
   if(!m||!chatA){hideMention();return;}
   const q=m[1].trim().toLowerCase();
-  const list=(state.agents||[]).filter(a=>a&&a.name&&(agentLabel(a).toLowerCase().includes(q)||a.name.toLowerCase().includes(q))).slice(0,8);
+  const list=scopeAgents().filter(a=>agentLabel(a).toLowerCase().includes(q)||a.name.toLowerCase().includes(q)).slice(0,8);
   if(!list.length){hideMention();return;}
   mBox.textContent='';
   list.forEach(a=>{const b=document.createElement('button');b.type='button';b.textContent=agentLabel(a);
