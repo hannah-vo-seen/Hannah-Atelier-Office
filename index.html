@@ -1177,6 +1177,7 @@ let threads=LS.get('vpd-threads',[]),seen=LS.get('vpd-seen',{}),known={};
 function saveThreads(){LS.set('vpd-threads',threads);LS.set('vpd-seen',seen);}
 function initials(n){const w=n.split(' – ')[0].split(/\s+/).filter(x=>x&&x.toLowerCase()!=='of'&&x!=='&');return ((w[0]||'')[0]||'')+((w[1]||'')[0]||'');}
 function unread(id){return Math.max(0,(known[id]||0)-(seen[id]||0));}
+const replyCount=h=>(h||[]).filter(m=>m.role==='assistant').length;
 function touchThread(id){if(!threads.includes(id))threads.push(id);saveThreads();}
 function renderThreads(){
   const box=$('heads');if(!box)return;box.textContent='';
@@ -1200,7 +1201,7 @@ async function pollThreads(){
   if(!pass)return;
   for(const id of threads){
     if(chatA&&id===chatA.id)continue;
-    try{const d=await api('/history',{agent:id});known[id]=d.history.length;if(seen[id]===undefined)seen[id]=d.history.length;}catch(e){}
+    try{const d=await api('/history',{agent:id});known[id]=replyCount(d.history);if(seen[id]===undefined)seen[id]=replyCount(d.history);}catch(e){}
   }
   saveThreads();renderThreads();
 }
@@ -1213,7 +1214,7 @@ async function api(path,payload){
 function bubble(text,mine){const d=document.createElement('div');d.className='m '+(mine?'u':'b');d.textContent=text;if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};d.title='Nhấp đúp để bật/tắt hành tinh';w.append(im,d);$('chatLog').appendChild(w);}$('chatLog').scrollTop=1e9;}
 async function loadHist(){
   const d=await api('/history',{});
-  known[chatA.id]=d.history.length;seen[chatA.id]=d.history.length;saveThreads();renderThreads();
+  known[chatA.id]=replyCount(d.history);seen[chatA.id]=replyCount(d.history);saveThreads();renderThreads();
   $('chatLog').textContent='';if(!d.history.length){const h=document.createElement('div');h.className='hello';const im=document.createElement('img');im.src='robot.png';im.alt='';const t=document.createElement('p');t.textContent='Hi Hannah! '+((chatA&&chatA.greet)||('Nhắn gì cho '+(chatA?chatA.name:'agent')+' nhé.'));h.append(im,t);$('chatLog').appendChild(h);}d.history.forEach(m=>bubble(m.content,m.role==='user'));
 }
 function openChat(a){
@@ -1225,20 +1226,30 @@ function openChat(a){
   $('chatForm').hidden=false;
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
-  pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,20000);
+  pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,10000);
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
 let sending=false;
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
-$('chatFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)$('chatNote').textContent='Đã chọn file: '+f.name+' (gửi file cần cập nhật Worker)';e.target.value='';};
+let pendingFile=null;
+$('chatFile').onchange=e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value='';
+  if(!f)return;
+  if(f.size>22*1024*1024){$('chatNote').textContent='File quá 22MB, chị chọn file nhỏ hơn.';return;}
+  const fr=new FileReader();
+  fr.onload=()=>{pendingFile={name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]};$('chatNote').textContent='📎 '+f.name+' (chạm vào đây để bỏ)';};
+  fr.readAsDataURL(f);
+};
+$('chatNote').onclick=()=>{if(pendingFile&&!sending){pendingFile=null;$('chatNote').textContent='';}};
 $('chatClose').onclick=()=>{$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);};
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
-  const t=$('chatIn').value.trim();if(!t||!chatA||sending)return;
-  $('chatIn').value='';bubble(t,true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  const t=$('chatIn').value.trim();if((!t&&!pendingFile)||!chatA||sending)return;
+  const file=pendingFile;pendingFile=null;
+  $('chatIn').value='';bubble(t||('📎 '+file.name),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
-    const d=await api('/chat',{message:t});bubble(d.answer,false);
+    const d=await api('/chat',{message:t,file});bubble(d.answer,false);
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
