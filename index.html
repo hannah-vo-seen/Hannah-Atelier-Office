@@ -1128,7 +1128,10 @@ function renderCols(){
     const card=ce('div','ocard'+(listOrg===o.id?' on':''));card.style.setProperty('--c',o.c);
     card.append(ce('div','on2',o.name),ce('div','om',l.length+' agent · '+rd+' sẵn sàng'));
     const sp=((state.syncPending||{})[o.id])||0;
-    const sy=ce('div','ot');sy.style.color=sp?C_LATE:C_OK;sy.textContent=sp?('Sheet: chưa khớp · '+sp+' việc chờ đồng bộ'):'Sheet: đã khớp';card.append(sy);
+    const sh=(state.sheets||{})[o.id];
+    const sy=ce('div','ot');sy.style.color=sp?C_LATE:C_OK;sy.textContent=sp?('Sheet: chưa khớp · '+sp+' việc chờ đồng bộ'):'Sheet: đã khớp';
+    if(sh){const sa=ce('a',null,' · Mở sheet');sa.href=sh;sa.target='_blank';sa.rel='noopener';sa.style.color='inherit';sa.onclick=e=>e.stopPropagation();sy.append(sa);}
+    card.append(sy);
     const ts=ce('div','ot');ts.append(ce('span',null,dn+' xong · '+dg+' đang xử lý · '),ce('b','late',lt+' trễ hạn'));card.append(ts);
     card.onclick=()=>{listOrg=listOrg===o.id?null:o.id;renderCols()};
     strip.appendChild(card);
@@ -1137,10 +1140,45 @@ function renderCols(){
 
   if(org){
     const bd=ce('div','board');
-    [['Đang xử lý',tasksOf(org.id,'doing'),C_DO],['Trễ hạn',tasksOf(org.id,'late'),C_LATE],['Hoàn thành',tasksOf(org.id,'done'),C_OK]].forEach(([title,arr,col])=>{
-      const bc=ce('div','bcol');const h=ce('h3');const dot=ce('i');dot.style.background=col;h.append(dot,ce('span',null,title+' · '+arr.length));bc.appendChild(h);
-      if(!arr.length)bc.appendChild(ce('div','mut','Chưa có việc'));
-      arr.forEach(t=>{const it=ce('div','bitem');const a=all.find(x=>x.id===t.agent);it.append(ce('div',null,t.title||t.id));it.append(ce('small',null,(a?a.name:(t.agent||''))+(t.due?' · hạn '+t.due:'')));bc.appendChild(it);});
+    const boOpen=window.boOpen||(window.boOpen={});
+    const fmtD=s=>{const p=String(s||'').slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]:'';};
+    const lateDays=t=>{const e=Date.parse(t.deadline||t.due||'');return isNaN(e)?0:Math.max(1,Math.floor((Date.now()-e)/86400000));};
+    const doneRecent=tasksOf(org.id,'done').slice().sort((a,b)=>String(b.doneAt||b.created||'').localeCompare(String(a.doneAt||a.created||''))).slice(0,5);
+    [['doing','Đang xử lý',C_DO,tasksOf(org.id,'doing'),tasksOf(org.id,'doing').length],['late','Trễ hạn',C_LATE,tasksOf(org.id,'late'),tasksOf(org.id,'late').length],['done','Hoàn thành',C_OK,doneRecent,tasksOf(org.id,'done').length]].forEach(([cat,title,col,arr,total])=>{
+      const key=org.id+'|'+cat;const open=!!boOpen[key];
+      const bc=ce('div','bcol');const h3=ce('h3');h3.style.cursor='pointer';
+      const arrow=ce('span',null,open?'▾':'▸');arrow.style.opacity='.7';
+      const dot=ce('i');dot.style.background=col;
+      h3.append(arrow,dot,ce('span',null,title+' · '+total));
+      h3.onclick=()=>{boOpen[key]=!open;renderCols();};
+      bc.appendChild(h3);
+      if(open){
+        if(!arr.length)bc.appendChild(ce('div','mut','Chưa có việc'));
+        arr.forEach(t=>{
+          const it=ce('div','bitem');it.style.borderLeft='3px solid '+col;
+          const a=all.find(x=>x.id===t.agent);
+          const who=t.owner||(a?a.name:(t.agent||''));
+          it.append(ce('div',null,t.title||t.id||'(không tên)'));
+          if(cat==='doing'){
+            const p=Math.max(0,Math.min(100,Number(t.progress)||0));
+            const row=ce('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px';
+            const track=ce('div');track.style.cssText='flex:1;height:6px;border-radius:3px;background:rgba(127,127,127,.2);overflow:hidden';
+            const fill=ce('i');fill.style.cssText='display:block;height:100%;width:'+p+'%;background:'+col;
+            track.appendChild(fill);
+            const pc=ce('span',null,p+'%');pc.style.fontSize='12px';
+            row.append(track,pc);
+            it.append(ce('small',null,who),row);
+          } else if(cat==='late'){
+            const row=ce('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:12px';
+            const lb=ce('b',null,'Trễ '+lateDays(t)+' ngày');lb.style.color=C_LATE;
+            row.append(ce('span',null,'Hạn '+(fmtD(t.deadline||t.due)||'?')+(who?' · '+who:'')),lb);
+            it.append(row);
+          } else {
+            it.append(ce('small',null,who+(t.doneAt?' · xong '+fmtD(t.doneAt):'')));
+          }
+          bc.appendChild(it);
+        });
+      }
       bd.appendChild(bc);
     });
     c.appendChild(bd);
@@ -1210,7 +1248,7 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
 // Số liệu việc từ Worker (chỉ đếm, không có tên việc)
-setTimeout(()=>{fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;state.syncPending=d.syncPending||{};renderStats();renderCols();}}).catch(()=>{});},0);
+setTimeout(()=>{fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;state.syncPending=d.syncPending||{};state.sheets=d.sheets||{};renderStats();renderCols();}}).catch(()=>{});},0);
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
