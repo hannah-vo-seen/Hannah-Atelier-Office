@@ -520,6 +520,10 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 @media (max-width:640px){#chat.big{position:fixed!important;top:8px!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;transform:none!important;z-index:60!important}}
 /* Điện thoại: khung chat luôn là một tấm phủ kín màn hình, và trang phía sau không cuộn theo */
 @media (max-width:640px){#chat{position:fixed!important;top:8px!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;transform:none!important;z-index:60!important;border-radius:20px!important}body:has(#chat:not([hidden])){overflow:hidden!important}}
+#mentionBox{position:absolute;left:12px;right:12px;bottom:58px;max-height:220px;overflow:auto;background:#fff;color:#2b2f45;border:1px solid #d9cff5;border-radius:12px;box-shadow:0 10px 30px rgba(90,60,160,.25);z-index:6}
+#mentionBox[hidden]{display:none}
+#mentionBox button{display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+#mentionBox button:hover{background:#f3eeff}
 </style>
 </head>
 <body>
@@ -1451,10 +1455,53 @@ async function pumpQueue(){
   if(sendQueue.length)pumpQueue();
   else if(onIt)$('chatNote').textContent='🔥 Xong';
 }
+// Gõ @ để chọn agent: gợi ý tên, chọn xong thì tin được gửi sang agent đó
+const mBox=document.createElement('div');mBox.id='mentionBox';mBox.hidden=true;
+$('chat').appendChild(mBox);
+const hideMention=()=>{mBox.hidden=true;};
+const orgNameOf=dept=>((ORGS.find(o=>o.id===dept)||{}).name)||'';
+const agentLabel=a=>a.name+' - '+orgNameOf(a.dept);
+function findMention(t){
+  if(!t||t[0]!=='@')return null;
+  const low=t.toLowerCase();
+  const all=(state.agents||[]).filter(a=>a&&a.name);
+  const labels=all.map(a=>({a,p:'@'+agentLabel(a).toLowerCase()})).sort((x,y)=>y.p.length-x.p.length);
+  for(const x of labels){
+    if(low===x.p)return {agent:x.a,rest:''};
+    if(low.startsWith(x.p+' '))return {agent:x.a,rest:t.slice(x.p.length+1).trim()};
+  }
+  const names=all.map(a=>({a,p:'@'+a.name.toLowerCase()})).sort((x,y)=>y.p.length-x.p.length);
+  for(const x of names){
+    const same=all.filter(a=>a.name.toLowerCase()===x.a.name.toLowerCase()).length;
+    if(same>1)continue;
+    if(low===x.p)return {agent:x.a,rest:''};
+    if(low.startsWith(x.p+' '))return {agent:x.a,rest:t.slice(x.p.length+1).trim()};
+  }
+  return null;
+}
+$('chatIn').addEventListener('input',()=>{
+  const v=$('chatIn').value;const m=v.match(/@([^@]*)$/);
+  if(!m||!chatA){hideMention();return;}
+  const q=m[1].trim().toLowerCase();
+  const list=(state.agents||[]).filter(a=>a&&a.name&&(agentLabel(a).toLowerCase().includes(q)||a.name.toLowerCase().includes(q))).slice(0,8);
+  if(!list.length){hideMention();return;}
+  mBox.textContent='';
+  list.forEach(a=>{const b=document.createElement('button');b.type='button';b.textContent=agentLabel(a);
+    b.onclick=()=>{const cur=$('chatIn').value;$('chatIn').value=cur.replace(/@([^@]*)$/,'@'+agentLabel(a)+' ');delete drafts[chatA.id];hideMention();$('chatIn').focus();};
+    mBox.appendChild(b);});
+  mBox.hidden=false;
+});
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
 let resizeQ=0;$('chatIn').addEventListener('input',()=>{typingAt=performance.now();document.documentElement.classList.add('typing');clearTimeout(typingT);typingT=setTimeout(()=>document.documentElement.classList.remove('typing'),1200);const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;if(!resizeQ)resizeQ=requestAnimationFrame(()=>{resizeQ=0;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
+  const mention=findMention($('chatIn').value.trim());
+  if(mention){
+    $('chatIn').value='';hideMention();
+    if(!chatA||mention.agent.id!==chatA.id)openChat(mention.agent);
+    if(mention.rest){$('chatIn').value=mention.rest;setTimeout(()=>$('chatForm').requestSubmit(),60);}
+    return;
+  }
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA)return;
   const files=pendingFiles;pendingFiles=[];showPending();
   const encSend=replyTo?encodeReply(replyTo,t):t;
