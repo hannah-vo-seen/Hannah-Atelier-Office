@@ -279,7 +279,8 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatInfo .ir{margin:6px 0}
 #chatInfo .ir b{display:block;font:700 11px var(--f);text-transform:uppercase;letter-spacing:.05em;color:#8a6fd6}
 #chat header .ava{cursor:pointer}
-#chat form button{flex:none}
+#chat form button{flex:none;height:40px;padding:0 18px}
+#chat form .attach{height:40px;width:40px;flex:none;box-sizing:border-box}
 #chat.big form{padding-right:96px}
 #chatBack{position:fixed;inset:0;z-index:19;background:rgba(20,14,40,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none}
 #chatBack.on{display:block}
@@ -1180,6 +1181,7 @@ tick();setInterval(tick,1000);
 fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   state.agents=d.agents||[];state.activity=d.activity||[];state.tasks=d.tasks||[];
   placeRobots();renderStats();renderList();setMode3d(g3d.checked);
+  renderThreads();if(pass)pollThreads();
 }).catch(()=>{
   $('list').innerHTML='<div class="empty">Không tải được agents.json.</div>';
 });
