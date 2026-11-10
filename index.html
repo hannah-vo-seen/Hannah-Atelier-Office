@@ -1167,7 +1167,8 @@ function renderCols(){
             track.appendChild(fill);
             const pc=ce('span',null,p+'%');pc.style.fontSize='12px';
             row.append(track,pc);
-            it.append(ce('small',null,who),row);
+            const SV={ASSIGNED:'Mới',IN_PROGRESS:'Đang làm',REVIEW:'Chờ kiểm tra',WAITING_APPROVAL:'Chờ Hannah duyệt',BLOCKED:'Bị chặn'};
+            it.append(ce('small',null,(SV[t.raw]||'')+(who?' · '+who:'')),row);
           } else if(cat==='late'){
             const row=ce('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:12px';
             const lb=ce('b',null,'Trễ '+lateDays(t)+' ngày');lb.style.color=C_LATE;
