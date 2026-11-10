@@ -572,6 +572,7 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
 <div id="chatBack"></div><div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatZoom" type="button" title="Mở rộng" style="margin-right:6px;font-size:16px;line-height:1">⤢</button><button id="chatMore" type="button" title="Thêm" style="font-size:18px;line-height:1;padding:0 6px">⋯</button><button id="chatClose" type="button">Đóng</button></header><div id="chatMenu" hidden><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này">🗑 Xoá lịch sử</button></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><div id="replyBar" hidden></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
+var typingAt=0,planetDraw=()=>{};
 (function(){
   var box=document.getElementById('intro');
   if(!box) return;
@@ -1001,7 +1002,6 @@ function initPlanet(){
   planetGroup.add(planetBall);
   setGlobe(null);
   const loop=()=>{
-    requestAnimationFrame(loop);
     if(!planetHost||!planetHost.isConnected)return;
     const w=planetHost.clientWidth,h=planetHost.clientHeight;if(!w||!h)return;
     const pr=planetR.getPixelRatio();
@@ -1009,9 +1009,11 @@ function initPlanet(){
     planetGroup.rotation.y+=.005;
     planetR.render(planetScene,planetCam);
   };
+  planetDraw=loop;
   loop();
+  window.addEventListener('resize',loop);
 }
-function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);}
+function mountPlanet(host){initPlanet();planetHost=host;host.appendChild(planetR.domElement);planetDraw();}
 let infoAgent=null,listOpen=true;
 const BRAND_COPY={
   cmd:{intro:'Trung tâm chỉ huy đặt giữa các vì sao. Mọi tín hiệu từ Hannah đều đi qua đây trước: Nova phân loại, Task Router xác định thương hiệu, Quality Control kiểm tra chất lượng rồi mới chuyển xuống hành tinh đích. Bảy agent cùng giữ nhịp, để không việc nào lạc quỹ đạo.'},
@@ -1251,7 +1253,7 @@ fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
 });
 // Số liệu việc từ Worker (chỉ đếm, không có tên việc)
 const loadViec=()=>fetch(WORKER_URL+'/viec',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d&&Array.isArray(d.tasks)){state.tasks=d.tasks;state.syncPending=d.syncPending||{};state.sheets=d.sheets||{};renderStats();renderCols();}}).catch(()=>{});
-setTimeout(()=>{loadViec();setInterval(()=>{if(!document.hidden)loadViec();},60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadViec();});},0);
+setTimeout(()=>{loadViec();setInterval(()=>{if(!document.hidden)loadViec();},15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadViec();});},0);
 
 /* ---------- chat qua Cloudflare Worker ---------- */
 const WORKER_URL='https://hannahatheier.hannahvo-contact.workers.dev';
@@ -1436,7 +1438,7 @@ async function pumpQueue(){
   else if(onIt)$('chatNote').textContent='🔥 Xong';
 }
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
-$('chatIn').addEventListener('input',()=>{const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});
+let resizeQ=0;$('chatIn').addEventListener('input',()=>{typingAt=performance.now();const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;if(!resizeQ)resizeQ=requestAnimationFrame(()=>{resizeQ=0;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA)return;
