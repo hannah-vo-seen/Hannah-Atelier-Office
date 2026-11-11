@@ -365,6 +365,9 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .threads::-webkit-scrollbar{display:none}
 .tav{position:relative;flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--c);background:#fff;color:#2b2f45;font:800 13px var(--f-d);cursor:pointer;padding:0;box-shadow:0 4px 12px rgba(150,120,255,.25)}
 .tav.on{box-shadow:0 0 0 3px var(--c),0 4px 12px rgba(150,120,255,.25)}
+@keyframes tavHop{0%,100%{transform:translateY(0)}30%{transform:translateY(-9px)}55%{transform:translateY(0)}75%{transform:translateY(-4px)}}
+.tav.hop{animation:tavHop .9s ease-out 1}
+@media (prefers-reduced-motion:reduce){.tav.hop{animation:none}}
 .tav .unr{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:10px;background:#ff3b5c;color:#fff;font:700 11px/19px var(--f);font-style:normal;text-align:center;padding:0 5px;box-shadow:0 0 0 2px #fff}
 @media(max-width:640px){
   #chat{right:76px;width:calc(100vw - 96px)}
@@ -1320,6 +1323,7 @@ function renderThreads(){
     const o=ORGS.find(z=>z.id===a.dept);const on=!!(chatA&&chatA.id===id);
     const b=document.createElement('button');b.type='button';b.className='tav'+(on?' on':'');b.title=a.name;
     b.style.setProperty('--c',o?o.c:'#8fb3ff');b.textContent=initials(a.name).toUpperCase();
+    if(hopSet[id])b.classList.add('hop');
     const n=on?0:unread(id);
     if(n>0){const i=document.createElement('i');i.className='unr';i.textContent=n>9?'9+':String(n);b.appendChild(i);}
     const hx=document.createElement('i');hx.className='hx';hx.textContent='×';hx.title='Bỏ khỏi danh sách';hx.onclick=e=>{e.stopPropagation();dropThread(id);};b.appendChild(hx);
@@ -1347,6 +1351,7 @@ async function checkInbox(){
 }
 // Tiếng "ting" kiểu Messenger khi có tin mới từ agent (dựng bằng Web Audio, không cần file âm thanh)
 let actx=null,pingReady=false;
+const hopSet={};
 function unlockAudio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}}
 document.addEventListener('pointerdown',unlockAudio,{passive:true});
 function playPing(){
@@ -1371,7 +1376,7 @@ async function pollThreads(){
     try{
       const d=await api('/history',{agent:id});
       const n=replyCount(d.history);
-      if(pingReady&&n>(before[id]||0))fresh=true;
+      if(pingReady&&n>(before[id]||0)){fresh=true;hopSet[id]=true;setTimeout(()=>{delete hopSet[id];renderThreads();},1000);}
       known[id]=n;if(seen[id]===undefined)seen[id]=n;
     }catch(e){}
   }
