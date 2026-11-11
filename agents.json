@@ -105,7 +105,7 @@
       "dept": "bq",
       "sub": "Chuyên môn",
       "order": 4,
-      "name": "Ads",
+      "name": "Ads Bách Quang",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Bách Quang, em đo lường cho Hannah.",
       "status": "ready"
@@ -197,7 +197,7 @@
       "dept": "mka",
       "sub": "Chuyên môn",
       "order": 4,
-      "name": "Ads",
+      "name": "Ads Asia New Vision",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Asia New Vision, em đo lường cho Hannah.",
       "status": "ready"
@@ -277,7 +277,7 @@
       "dept": "el",
       "sub": "Chuyên môn",
       "order": 4,
-      "name": "Ads",
+      "name": "Ads Ember Lens",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Ember Lens, em đo lường cho Hannah.",
       "status": "ready"
