@@ -130,6 +130,8 @@ body.list-mode.light .sc b,body.list-mode.light .panel h2{color:#1b2433;text-sha
 body.list-mode.light .sc i,body.list-mode.light .mut,body.list-mode.light th{color:#55627c;text-shadow:none}
 body.list-mode.light td{color:#1b2433}
 #chatLog .tw th{color:#2b2f45;background:rgba(155,120,255,.14)}
+.cimg{display:block;max-width:min(260px,100%);border-radius:16px;margin:6px 0;box-shadow:0 6px 18px rgba(120,100,200,.25)}
+.cimgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.cimgs .cimg{margin:0;max-width:150px}
 #chatLog .tw td{color:#2b2f45}
 body.list-mode.light .pill-f{background:rgba(255,255,255,.7);color:#1b2433;border-color:rgba(255,255,255,.95)}
 body.list-mode.light .pill-f.on{background:linear-gradient(90deg,#b19cff,#7fb6ff);color:#fff}
@@ -1433,7 +1435,8 @@ const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|
 const jumpTo=(snip)=>{const norm=x=>String(x).replace(/\s+/g,' ').trim();const key=norm(snip).slice(0,30);const hit=[...$('chatLog').querySelectorAll('.m.b')].find(x=>norm(x.textContent).includes(key));if(!hit)return;hit.scrollIntoView({block:'center',behavior:'smooth'});hit.classList.add('hl');setTimeout(()=>hit.classList.remove('hl'),1500);};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtInline=t=>esc(t).replace(/https?:\/\/[^\s<"]+/g,u=>{const m=u.match(/^(.*?)([.,;:!?)]*)$/);return '<a href="'+m[1]+'" target="_blank" rel="noopener">'+m[1]+'</a>'+m[2];}).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
-const fmt=s=>{const L=String(s).split('\n');let out=[],i=0;while(i<L.length){const ln=L[i];if(/^\s*\|/.test(ln)){const rows=[];while(i<L.length&&/^\s*\|/.test(L[i])){if(!/^\s*\|?\s*:?-{3,}/.test(L[i]))rows.push(L[i]);i++;}const cells=r=>r.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());out.push('<div class="tw"><table>'+rows.map((r,k)=>'<tr>'+cells(r).map(c=>k===0?'<th>'+fmtInline(c)+'</th>':'<td>'+fmtInline(c)+'</td>').join('')+'</tr>').join('')+'</table></div>');continue;}const h=ln.match(/^\s*#{1,3}\s+(.*)$/);if(h){out.push('<div class="mh">'+fmtInline(h[1])+'</div>');i++;continue;}out.push(fmtInline(ln));i++;}return out.join('<br>').replace(/(<\/div>)<br>/g,'$1');};
+const IMG_RE=/^\s*(https?:\/\/\S+?\.(?:png|jpe?g|webp|gif)(?:\?\S*)?|https?:\/\/\S+\/img\/[\w-]+)\s*$/i;
+const fmt=s=>{const L=String(s).split('\n');let out=[],i=0;while(i<L.length){const ln=L[i];const im=ln.match(IMG_RE);if(im){out.push('<img class="cimg" loading="lazy" alt="" src="'+im[1].replace(/"/g,'%22')+'">');i++;continue;}if(/^\s*\|/.test(ln)){const rows=[];while(i<L.length&&/^\s*\|/.test(L[i])){if(!/^\s*\|?\s*:?-{3,}/.test(L[i]))rows.push(L[i]);i++;}const cells=r=>r.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim());out.push('<div class="tw"><table>'+rows.map((r,k)=>'<tr>'+cells(r).map(c=>k===0?'<th>'+fmtInline(c)+'</th>':'<td>'+fmtInline(c)+'</td>').join('')+'</tr>').join('')+'</table></div>');continue;}const h=ln.match(/^\s*#{1,3}\s+(.*)$/);if(h){out.push('<div class="mh">'+fmtInline(h[1])+'</div>');i++;continue;}out.push(fmtInline(ln));i++;}return out.join('<br>').replace(/(<\/div>)<br>/g,'$1');};
 // Vuốt trái một tin của agent trên điện thoại để trả lời tin đó
 function attachSwipe(d,text){
   let sx=0,sy=0,on=false;
@@ -1482,6 +1485,16 @@ $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
 $('chatAva').onclick=()=>{if(!chatA)return;infoAgent=(infoAgent&&infoAgent.id===chatA.id)?null:chatA;renderCols();};
 let pendingFiles=[];
 const readFile=f=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res({name:f.name,type:f.type||'application/pdf',data:String(fr.result).split(',')[1]});fr.onerror=rej;fr.readAsDataURL(f);});
+function addThumbs(files){
+  try{
+    const imgs=(files||[]).filter(f=>/^image\//.test(f.type||''));
+    if(!imgs.length)return;
+    const last=$('chatLog').lastElementChild;if(!last)return;
+    const box=document.createElement('div');box.className='cimgs';
+    imgs.forEach(f=>{const im=document.createElement('img');im.className='cimg';im.alt=f.name||'';im.src='data:'+f.type+';base64,'+f.data;box.appendChild(im);});
+    last.appendChild(box);
+  }catch(e){}
+}
 const showPending=()=>{const n=$('chatNote');n.textContent='';pendingFiles.forEach((f,i)=>{const r=document.createElement('div');r.className='pf';r.textContent='📎 '+f.name+'  ✕';r.title='Chạm để bỏ file này';r.onclick=()=>{if(sending)return;pendingFiles.splice(i,1);showPending();};n.appendChild(r);});};
 $('chatFile').onchange=async e=>{
   const list=[...(e.target.files||[])];e.target.value='';
@@ -1615,7 +1628,7 @@ $('chatForm').onsubmit=async e=>{
   const encSend=replyTo?encodeReply(replyTo,t):t;
   if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
   if(queueBusy){sendQueue.push({agent:chatA.id,txt:encSend,files});$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
-  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);sending=true;$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
     const sendTxt=encSend;replyTo=null;showReply();
