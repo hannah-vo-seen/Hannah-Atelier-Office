@@ -8,7 +8,8 @@
       "name": "Nova",
       "role": "Đầu mối duy nhất với Hannah; nhận việc, phân loại và điều phối các agent",
       "greet": "Hannah muốn giao việc gì? Em sẽ phân loại và chuyển đúng agent.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Lead Coordinator"
     },
     {
       "id": "cmd-02",
@@ -18,7 +19,8 @@
       "name": "Terra",
       "role": "Quản lý danh sách việc, deadline và tiến độ",
       "greet": "Hannah muốn xem việc nào, hay thêm việc mới ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Task Manager"
     },
     {
       "id": "cmd-03",
@@ -28,7 +30,8 @@
       "name": "Sol",
       "role": "Nhắc việc theo lịch (8:00 và 22:00)",
       "greet": "Hannah muốn em nhắc việc gì, lúc mấy giờ ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Reminder"
     },
     {
       "id": "cmd-04",
@@ -38,7 +41,8 @@
       "name": "Orbit",
       "role": "Tổng hợp báo cáo ngày, tuần, tháng",
       "greet": "Hannah cần báo cáo ngày, tuần hay tháng ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Reporting"
     },
     {
       "id": "cmd-05",
@@ -48,7 +52,8 @@
       "name": "Zenith",
       "role": "Kiểm tra chất lượng trước khi việc lên Nova",
       "greet": "Hannah gửi sản phẩm cần kiểm tra, em xem chất lượng cho Hannah.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Quality Control"
     },
     {
       "id": "cmd-06",
@@ -58,7 +63,8 @@
       "name": "Eclipse",
       "role": "Theo dõi hệ thống và báo cáo cho Nova",
       "greet": "Hannah muốn hỏi tình trạng hệ thống nào ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "System Monitor"
     },
     {
       "id": "cmd-07",
@@ -68,7 +74,8 @@
       "name": "Solaris",
       "role": "Xác định thương hiệu và kiểm tra quyền truy cập của việc",
       "greet": "Hannah gửi việc cần xác định thương hiệu, em sẽ điều hướng cho Hannah.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Task Router"
     },
     {
       "id": "bq-08",
@@ -78,7 +85,8 @@
       "name": "Orion",
       "role": "Giám sát Team Leader của Bách Quang, duyệt kế hoạch trong thương hiệu",
       "greet": "Hannah muốn xem kế hoạch nào của Bách Quang ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Supervisor"
     },
     {
       "id": "bq-09",
@@ -88,7 +96,8 @@
       "name": "Atlas",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Bách Quang",
       "greet": "Hannah giao việc cho Bách Quang, em sẽ lập kế hoạch và chia việc.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Team Leader"
     },
     {
       "id": "bq-10",
@@ -98,7 +107,8 @@
       "name": "Lyra",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Hannah muốn em viết nội dung gì cho Bách Quang ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Content"
     },
     {
       "id": "bq-11",
@@ -108,7 +118,8 @@
       "name": "Sirius",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Bách Quang, em đo lường cho Hannah.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Ads"
     },
     {
       "id": "bq-12",
@@ -118,7 +129,8 @@
       "name": "Vega",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Hannah cần nghiên cứu sản phẩm nào của Bách Quang ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Product Research"
     },
     {
       "id": "bq-13",
@@ -128,7 +140,8 @@
       "name": "Rigel",
       "role": "Nghiên cứu thị trường",
       "greet": "Hannah muốn em tìm hiểu thị trường nào cho Bách Quang?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Market Research"
     },
     {
       "id": "bq-14",
@@ -138,7 +151,8 @@
       "name": "Aurora",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Hannah muốn em theo dõi xu hướng hay sự kiện nào cho Bách Quang?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Trend & Event"
     },
     {
       "id": "bq-15",
@@ -148,7 +162,8 @@
       "name": "Pulsar",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Hannah cần ý tưởng hay thiết kế gì cho Bách Quang ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Creative & Design"
     },
     {
       "id": "bq-32",
@@ -160,7 +175,8 @@
       "greet": "Hannah muốn em lập kế hoạch gì cho Bách Quang ạ?",
       "status": "ready",
       "short": "Kế hoạch marketing",
-      "updated": "2026-11-10T16:34:00Z"
+      "updated": "2026-11-10T16:34:00Z",
+      "title": "Planning"
     },
     {
       "id": "mka-16",
@@ -170,7 +186,8 @@
       "name": "Polaris",
       "role": "Giám sát Team Leader của Asia New Vision, duyệt kế hoạch trong thương hiệu",
       "greet": "Hannah muốn xem kế hoạch nào của Asia New Vision ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Supervisor"
     },
     {
       "id": "mka-17",
@@ -180,7 +197,8 @@
       "name": "Titan",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Asia New Vision",
       "greet": "Hannah giao việc cho Asia New Vision, em sẽ lập kế hoạch và chia việc.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Team Leader"
     },
     {
       "id": "mka-18",
@@ -190,7 +208,8 @@
       "name": "Astra",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Hannah muốn em viết nội dung gì cho Asia New Vision ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Content"
     },
     {
       "id": "mka-19",
@@ -200,7 +219,8 @@
       "name": "Comet",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Asia New Vision, em đo lường cho Hannah.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Ads"
     },
     {
       "id": "mka-20",
@@ -210,7 +230,8 @@
       "name": "Lumen",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Hannah cần nghiên cứu sản phẩm nào của Asia New Vision ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Product Research"
     },
     {
       "id": "mka-21",
@@ -220,7 +241,8 @@
       "name": "Meteor",
       "role": "Nghiên cứu thị trường",
       "greet": "Hannah muốn em tìm hiểu thị trường nào cho Asia New Vision?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Market Research"
     },
     {
       "id": "mka-22",
@@ -230,7 +252,8 @@
       "name": "Cosmo",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Hannah muốn em theo dõi xu hướng hay sự kiện nào cho Asia New Vision?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Trend & Event"
     },
     {
       "id": "mka-23",
@@ -240,7 +263,8 @@
       "name": "Quasar",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Hannah cần ý tưởng hay thiết kế gì cho Asia New Vision ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Creative & Design"
     },
     {
       "id": "el-24",
@@ -250,7 +274,8 @@
       "name": "Zara",
       "role": "Giám sát Team Leader của Ember Lens, duyệt kế hoạch trong thương hiệu",
       "greet": "Hannah muốn xem kế hoạch nào của Ember Lens ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Supervisor"
     },
     {
       "id": "el-25",
@@ -260,7 +285,8 @@
       "name": "Eli",
       "role": "Lập kế hoạch, chia việc và giao cho 6 agent chuyên môn của Ember Lens",
       "greet": "Hannah giao việc cho Ember Lens, em sẽ lập kế hoạch và chia việc.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Team Leader"
     },
     {
       "id": "el-26",
@@ -270,7 +296,8 @@
       "name": "Ruby",
       "role": "Lập kế hoạch và viết nội dung cho thương hiệu",
       "greet": "Hannah muốn em viết nội dung gì cho Ember Lens ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Content"
     },
     {
       "id": "el-27",
@@ -280,7 +307,8 @@
       "name": "Jade",
       "role": "Quản lý và đo lường quảng cáo (Meta, Google)",
       "greet": "Hannah hỏi về quảng cáo của Ember Lens, em đo lường cho Hannah.",
-      "status": "ready"
+      "status": "ready",
+      "title": "Ads"
     },
     {
       "id": "el-28",
@@ -290,7 +318,8 @@
       "name": "Vera",
       "role": "Nghiên cứu sản phẩm, đối chiếu tài liệu gốc",
       "greet": "Hannah cần nghiên cứu sản phẩm nào của Ember Lens ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Product Research"
     },
     {
       "id": "el-29",
@@ -300,7 +329,8 @@
       "name": "Ivy",
       "role": "Nghiên cứu thị trường",
       "greet": "Hannah muốn em tìm hiểu thị trường nào cho Ember Lens?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Market Research"
     },
     {
       "id": "el-30",
@@ -310,7 +340,8 @@
       "name": "Coco",
       "role": "Theo dõi xu hướng và sự kiện",
       "greet": "Hannah muốn em theo dõi xu hướng hay sự kiện nào cho Ember Lens?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Trend & Event"
     },
     {
       "id": "el-31",
@@ -320,7 +351,8 @@
       "name": "Pixie",
       "role": "Ý tưởng sáng tạo và thiết kế hình ảnh",
       "greet": "Hannah cần ý tưởng hay thiết kế gì cho Ember Lens ạ?",
-      "status": "ready"
+      "status": "ready",
+      "title": "Creative & Design"
     }
   ],
   "activity": [],
