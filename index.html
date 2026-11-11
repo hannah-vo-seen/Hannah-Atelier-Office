@@ -1403,7 +1403,7 @@ async function pollThreads(){
     if(chatA&&id===chatA.id)continue;
     try{
       const d=await api('/history',{agent:id});
-      const n=replyCount(d.history);
+      const n=(d.total!=null)?d.total:replyCount(d.history);
       if(pingReady&&n>(before[id]||0)){
         fresh=true;hopSet[id]=true;setTimeout(()=>{delete hopSet[id];renderThreads();},1000);
         const lastA=[...(d.history||[])].reverse().find(m=>m.role==='assistant');
@@ -1456,7 +1456,7 @@ function pendRender(id){(pendOut[id]||[]).forEach(t=>bubble(t,true));}
 async function loadHist(){
   if(performance.now()-typingAt<1200)return;
   const d=await api('/history',{});
-  const total=replyCount(d.history);
+  const total=(d.total!=null)?d.total:replyCount(d.history);
   known[chatA.id]=total;seen[chatA.id]=total;saveThreads();renderThreads();
   const sig=JSON.stringify(d.history);
   if(lastSig[chatA.id]===sig)return;
