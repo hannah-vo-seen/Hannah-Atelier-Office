@@ -1623,8 +1623,7 @@ $('chatForm').onsubmit=async e=>{
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
   finally{sending=false;pumpQueue();}
 };
-</script>
-<script>
+
 // ---- Thông báo đẩy: bật bằng nút 🔔 (cần thêm app vào Màn hình chính trên iPhone) ----
 const VAPID_PUBLIC='BEJLOt3Gzq-3ZLSmTdnD5kWsHOld23cjVIvdlwj1oKGQOaWaRqzW8Dl78Gfzj5UKXWeV7rOV2C1aB9cftt5qOxE';
 function urlB64ToU8(sv){const pad='='.repeat((4-sv.length%4)%4);const b=(sv+pad).replace(/-/g,'+').replace(/_/g,'/');const raw=atob(b);return Uint8Array.from(raw,c=>c.charCodeAt(0));}
@@ -1644,6 +1643,9 @@ async function batThongBao(){
     alert('Đã bật thông báo ✅');
   }catch(e){alert('Chưa bật được: '+e.message);}
 }
+
+window.batThongBao=batThongBao;
 </script>
+<script>
 </body>
 </html>
