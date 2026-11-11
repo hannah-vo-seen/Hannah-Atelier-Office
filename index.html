@@ -317,6 +317,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatBack.on{display:block}
 #chat.big{left:16px;right:auto;width:calc(100vw - 130px);height:calc(100vh - 40px);bottom:20px;transform:none}
 @media (max-width:640px){#chat.big{left:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);bottom:8px}}
+@media (max-width:640px){body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 56px)}details.settings{margin-bottom:24px}}
 .sphere{min-height:480px;padding:0}
 .planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
 .planetbox .bubble{height:92%;width:auto;max-width:92%;aspect-ratio:1;object-fit:contain;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
@@ -1625,7 +1626,7 @@ $('chatForm').onsubmit=async e=>{
 };
 
 // ---- Thông báo đẩy: bật bằng nút 🔔 (cần thêm app vào Màn hình chính trên iPhone) ----
-const VAPID_PUBLIC='BEJLOt3Gzq-3ZLSmTdnD5kWsHOld23cjVIvdlwj1oKGQOaWaRqzW8Dl78Gfzj5UKXWeV7rOV2C1aB9cftt5qOxE';
+const VAPID_PUBLIC='PASTE_VAPID_PUBLIC_KEY_HERE';
 function urlB64ToU8(sv){const pad='='.repeat((4-sv.length%4)%4);const b=(sv+pad).replace(/-/g,'+').replace(/_/g,'/');const raw=atob(b);return Uint8Array.from(raw,c=>c.charCodeAt(0));}
 async function batThongBao(){
   try{
