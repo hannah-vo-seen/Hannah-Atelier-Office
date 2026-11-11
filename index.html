@@ -615,7 +615,7 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
   <div class="note">Trạng thái lấy từ agents.json (dữ liệu mẫu, sửa file để đổi). Kéo để xoay, cuộn để phóng to, bấm tổ chức để vào văn phòng, bấm robot để xem chi tiết.</div>
 </div>
 
-<details class="settings"><summary>Cài đặt</summary><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
+<details class="settings"><summary>Cài đặt</summary><div style="padding:6px 0"><button type="button" onclick="batThongBao()" style="border:0;border-radius:12px;padding:8px 12px;background:#7c5cff;color:#fff;font-weight:700;cursor:pointer">🔔 Bật thông báo</button></div><input type="checkbox" id="g3d" hidden><label class="sw"><input type="checkbox" id="thAuto"> Tự đổi sáng/tối theo giờ</label><label class="sw"><input type="checkbox" id="thLight"> Giao diện sáng (khi tắt tự đổi)</label><div class="tok"><button id="passClear" type="button">Xóa mật khẩu chat đã lưu</button><span id="passState"></span></div></details>
 <div id="passModal" hidden><div class="pm"><h3>Mật khẩu chat</h3><p>Nhập để trò chuyện với agent. Bỏ qua thì chỉ xem giao diện.</p><input type="password" id="pmIn" placeholder="Mật khẩu"><div class="pmb"><button id="pmSkip" type="button">Bỏ qua</button><button id="pmOk" type="button">Vào</button></div></div></div>
 <div id="chatBack"></div><div id="chat" hidden><img id="mascot" src="planet.png" alt="" hidden><header><img class="ava" id="chatAva" src="planet.png" alt="" title="Xem nhiệm vụ"><span id="chatTitle"></span><button id="chatZoom" type="button" title="Mở rộng" style="margin-right:6px;font-size:16px;line-height:1">⤢</button><button id="chatMore" type="button" title="Thêm" style="font-size:18px;line-height:1;padding:0 6px">⋯</button><button id="chatClose" type="button">Đóng</button></header><div id="chatMenu" hidden><button id="chatWipe" type="button" title="Xoá hết lịch sử và file của agent này">🗑 Xoá lịch sử</button></div><div class="log" id="chatLog"></div><div class="note" id="chatNote"></div><div id="replyBar" hidden></div><form id="chatForm"><label class="attach" title="Đính kèm file"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1 12.2 20.3a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" id="chatFile" accept="application/pdf,image/*" multiple hidden></label><textarea id="chatIn" rows="1" placeholder="Nhắn cho agent..." autocomplete="off"></textarea><button type="submit">Gửi</button></form></div><div id="heads" class="heads"></div>
 <script>
@@ -1623,6 +1623,27 @@ $('chatForm').onsubmit=async e=>{
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
   finally{sending=false;pumpQueue();}
 };
+</script>
+<script>
+// ---- Thông báo đẩy: bật bằng nút 🔔 (cần thêm app vào Màn hình chính trên iPhone) ----
+const VAPID_PUBLIC='PASTE_VAPID_PUBLIC_KEY_HERE';
+function urlB64ToU8(sv){const pad='='.repeat((4-sv.length%4)%4);const b=(sv+pad).replace(/-/g,'+').replace(/_/g,'/');const raw=atob(b);return Uint8Array.from(raw,c=>c.charCodeAt(0));}
+async function batThongBao(){
+  try{
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window)){alert('Máy này chưa hỗ trợ thông báo. Trên iPhone hãy thêm app vào Màn hình chính rồi mở từ icon.');return;}
+    if(VAPID_PUBLIC.startsWith('PASTE')){alert('Chưa có khoá thông báo trong app.');return;}
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){alert('Hannah chưa cho phép thông báo.');return;}
+    const reg=await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToU8(VAPID_PUBLIC)});
+    const r=await fetch(WORKER_URL+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass,subscription:sub.toJSON()})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||('HTTP '+r.status));
+    alert('Đã bật thông báo ✅');
+  }catch(e){alert('Chưa bật được: '+e.message);}
+}
 </script>
 </body>
 </html>
