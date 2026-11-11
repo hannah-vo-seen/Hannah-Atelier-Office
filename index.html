@@ -1345,14 +1345,39 @@ async function checkInbox(){
     if(ch){saveThreads();renderThreads();}
   }catch(e){}
 }
+// Tiếng "ting" kiểu Messenger khi có tin mới từ agent (dựng bằng Web Audio, không cần file âm thanh)
+let actx=null,pingReady=false;
+function unlockAudio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}}
+document.addEventListener('pointerdown',unlockAudio,{passive:true});
+function playPing(){
+  try{
+    unlockAudio();if(!actx)return;
+    const t=actx.currentTime;
+    [[880,0],[1320,0.09]].forEach(([f,d])=>{
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(0.18,t+d+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+d+0.22);
+      o.connect(g);g.connect(actx.destination);o.start(t+d);o.stop(t+d+0.25);
+    });
+  }catch(e){}
+}
 async function pollThreads(){
   if(!pass)return;
   await checkInbox();
+  const before={};threads.forEach(id=>{before[id]=known[id]||0;});
+  let fresh=false;
   for(const id of threads){
     if(chatA&&id===chatA.id)continue;
-    try{const d=await api('/history',{agent:id});known[id]=replyCount(d.history);if(seen[id]===undefined)seen[id]=replyCount(d.history);}catch(e){}
+    try{
+      const d=await api('/history',{agent:id});
+      const n=replyCount(d.history);
+      if(pingReady&&n>(before[id]||0))fresh=true;
+      known[id]=n;if(seen[id]===undefined)seen[id]=n;
+    }catch(e){}
   }
   saveThreads();renderThreads();
+  if(fresh)playPing();
+  pingReady=true;
 }
 async function api(path,payload){
   const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,pass,agent:(payload&&payload.agent)||chatA.id})});
