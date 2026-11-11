@@ -565,11 +565,11 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 #splash span{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 14px rgba(90,60,160,.55);letter-spacing:.3px}
 @media (max-width:640px){html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden;height:100%}}
 @media(max-width:640px){
-  .heads{flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:flex-start!important;padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 50px)!important;gap:4px!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .heads::-webkit-scrollbar{display:none}
-  .heads .tav{flex:none;margin:0 12px}
-  .heads .tav .tn{width:84px;max-width:84px;white-space:nowrap}
-  .heads .tav .tn b,.heads .tav .tn small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .heads{display:grid!important;grid-template-columns:repeat(4,1fr)!important;overflow:visible!important;justify-items:center;padding:10px 8px calc(env(safe-area-inset-bottom,0px) + 56px)!important;gap:18px 4px!important}
+  .heads .tav{margin:0!important}
+  .heads .tav .tn{width:84px;max-width:84px}
+  .heads .tav .tn small{display:none}
+  .heads .tav .tn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
 </head>
