@@ -1071,6 +1071,7 @@ const BRAND_COPY={
 };
 const GPOS={cmd:[22,-60],bq:[-5,0],mka:[-28,55],el:[38,25]};
 let GL=null,globeStarted=false;
+window.addEventListener('resize',()=>{if(GL)GL.drawn=false;});
 const SPIN=0;
 function globeTick(){
   requestAnimationFrame(globeTick);
