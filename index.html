@@ -563,6 +563,14 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 #splash{position:fixed;inset:0;z-index:9999;background:#f7f5fd url(app-bg.jpg) center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12vh;transition:opacity .6s ease}
 #splash.off{opacity:0;pointer-events:none}
 #splash span{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 14px rgba(90,60,160,.55);letter-spacing:.3px}
+@media (max-width:640px){html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden;height:100%}}
+@media(max-width:640px){
+  .heads{flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:flex-start!important;padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 50px)!important;gap:4px!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .heads::-webkit-scrollbar{display:none}
+  .heads .tav{flex:none;margin:0 12px}
+  .heads .tav .tn{width:84px;max-width:84px;white-space:nowrap}
+  .heads .tav .tn b,.heads .tav .tn small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
 </style>
 </head>
 <body>
@@ -1487,8 +1495,20 @@ function openChat(a){
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
   pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,10000);
+  fitChat();
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
+// Trên điện thoại: khung chat bám đúng vùng nhìn thấy khi bàn phím mở, không để lộ nền bên dưới
+function fitChat(){
+  try{
+    const c=$('chat');if(!c||c.hidden||window.innerWidth>640)return;
+    const vv=window.visualViewport;
+    const h=vv?vv.height:window.innerHeight,top=vv?vv.offsetTop:0;
+    c.style.top=top+'px';c.style.bottom='auto';c.style.height=h+'px';c.style.left='0';c.style.right='0';
+  }catch(e){}
+}
+if(window.visualViewport){visualViewport.addEventListener('resize',fitChat);visualViewport.addEventListener('scroll',fitChat);}
+window.addEventListener('resize',fitChat);
 let sending=false;let sendQueue=[];
 $('chatZoom').onclick=()=>{const big=$('chat').classList.toggle('big');$('chatBack').classList.toggle('on',big);$('chatZoom').textContent=big?'⤡':'⤢';$('chatZoom').title=big?'Thu nhỏ':'Mở rộng';};
 $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
