@@ -1273,11 +1273,11 @@ function renderCols(){
   }
 
   const tb=ce('table','tbl');
-  tb.innerHTML='<thead><tr><th>Agent</th><th>Tổ chức</th><th>Chức vụ</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
+  tb.innerHTML='<thead><tr><th>Agent</th><th>Chức vụ</th><th>Trạng thái</th></tr></thead><tbody></tbody>';
   const body=tb.querySelector('tbody');
   scoped.slice().sort((x,y)=>ORGS.findIndex(o=>o.id===x.dept)-ORGS.findIndex(o=>o.id===y.dept)||(x.order||0)-(y.order||0)).forEach(a=>{
     const o=ORGS.find(z=>z.id===a.dept),tr=ce('tr');tr.style.cursor='pointer';if(o)tr.style.color=o.t;tr.onclick=()=>openChat(a);
-    [a.name,o?o.name:'',a.role||'—'].forEach(t=>tr.appendChild(ce('td',null,t)));
+    [a.name,a.title||a.role||'—'].forEach(t=>tr.appendChild(ce('td',null,t)));
     const td=ce('td');td.appendChild(ce('span','st '+(a.status||'off'),LABEL[a.status]||''));tr.appendChild(td);body.appendChild(tr);
   });
   tp.appendChild(tb);
@@ -1337,7 +1337,7 @@ function renderThreads(){
     const a=state.agents.find(x=>x.id===id);if(!a)return;
     const o=ORGS.find(z=>z.id===a.dept);const on=!!(chatA&&chatA.id===id);
     const b=document.createElement('button');b.type='button';b.className='tav'+(on?' on':'');b.title=a.name;
-    b.style.setProperty('--c',o?o.c:'#8fb3ff');b.textContent=initials(a.name).toUpperCase();b.title=a.name+(a.role?' – '+a.role:'');const tn=document.createElement('span');tn.className='tn';const tnb=document.createElement('b');tnb.textContent=a.name;tn.appendChild(tnb);if(a.role){const tr=document.createElement('small');tr.textContent=a.role;tn.appendChild(tr);}b.appendChild(tn);
+    b.style.setProperty('--c',o?o.c:'#8fb3ff');b.textContent=initials(a.name).toUpperCase();b.title=a.name+((a.title||a.role)?' – '+(a.title||a.role):'');const tn=document.createElement('span');tn.className='tn';const tnb=document.createElement('b');tnb.textContent=a.name;tn.appendChild(tnb);if(a.title||a.role){const tr=document.createElement('small');tr.textContent=a.title||a.role;tn.appendChild(tr);}b.appendChild(tn);
     if(hopSet[id])b.classList.add('hop');
     const n=on?0:unread(id);
     if(n>0){const i=document.createElement('i');i.className='unr';i.textContent=n>9?'9+':String(n);b.appendChild(i);}
@@ -1479,7 +1479,7 @@ async function loadHist(){
 const drafts={};
 function openChat(a){
   if(infoAgent){infoAgent=null;renderCols();}
-  chatA=a;touchThread(a.id);renderThreads();{const ct=$('chatTitle');ct.textContent=a.name;if(a.role){const cr=document.createElement('small');cr.className='ctRole';cr.textContent=a.role;ct.appendChild(cr);}}$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];replyTo=null;showReply();$('chatIn').value=drafts[a.id]||'';$('chatIn').style.height='';pendingFiles=[];showPending();
+  chatA=a;touchThread(a.id);renderThreads();{const ct=$('chatTitle');ct.textContent=a.name;if(a.title||a.role){const cr=document.createElement('small');cr.className='ctRole';cr.textContent=a.title||a.role;ct.appendChild(cr);}}$('chat').hidden=false;$('chatLog').textContent='';$('chatNote').textContent='';delete lastSig[a.id];replyTo=null;showReply();$('chatIn').value=drafts[a.id]||'';$('chatIn').style.height='';pendingFiles=[];showPending();
   clearInterval(chatTimer);
   if(!pass){$('passModal').hidden=false;}
   if(!pass){$('chatForm').hidden=true;$('chatNote').textContent='Chưa có mật khẩu. Bấm lại dòng agent để nhập.';return;}
