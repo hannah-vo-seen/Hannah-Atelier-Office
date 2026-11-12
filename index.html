@@ -572,7 +572,8 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
   .heads .tav .tn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 @media (min-width:641px){
-  .heads{gap:6px!important}
+  .heads{gap:6px!important;max-height:calc(100vh - 40px);overflow-y:auto;overflow-x:visible;scrollbar-width:none;padding:10px 6px}
+  .heads::-webkit-scrollbar{display:none}
   .heads .tav .hx{opacity:0;transition:opacity .15s}
   .heads .tav:hover .hx,.heads .tav:focus-visible .hx{opacity:1}
   .heads .tav{width:40px;height:40px}
@@ -581,6 +582,11 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
   .heads .tav:hover,.heads .tav:focus-visible{z-index:5}
 }
 @media (min-width:641px){.wrap{padding-right:88px}}
+.morePop{position:fixed;right:70px;bottom:16px;z-index:60;background:#fff;border-radius:14px;box-shadow:0 12px 30px rgba(120,100,200,.3);padding:8px;display:flex;flex-direction:column;gap:2px;max-height:60vh;overflow:auto;min-width:180px}
+.morePop[hidden]{display:none}
+.mpItem{border:0;background:none;text-align:left;padding:8px 10px;border-radius:10px;font:600 13px var(--f);color:#2b2f45;cursor:pointer}
+.mpItem:hover{background:rgba(155,120,255,.12)}
+.tav.more{font:800 12px var(--f-d);color:#4a3f8a}
 </style>
 </head>
 <body>
@@ -1350,7 +1356,8 @@ function unread(id){return Math.max(0,(known[id]||0)-(seen[id]||0));}
 const replyCount=h=>(h||[]).filter(m=>m.role==='assistant').length;
 function touchThread(id){if(!threads.includes(id))threads.push(id);saveThreads();}
 function renderThreads(){
-  const box=$('heads');if(!box)return;box.textContent='';
+  const box=$('heads');if(!box)return;box.textContent='';document.querySelectorAll('.morePop').forEach(x=>x.remove());
+  const allBtns=[];
   [...new Set([...threads,chatA&&chatA.id].filter(Boolean))].forEach(id=>{
     const a=state.agents.find(x=>x.id===id);if(!a)return;
     const o=ORGS.find(z=>z.id===a.dept);const on=!!(chatA&&chatA.id===id);
@@ -1360,9 +1367,21 @@ function renderThreads(){
     const n=on?0:unread(id);
     if(n>0){const i=document.createElement('i');i.className='unr';i.textContent=n>9?'9+':String(n);b.appendChild(i);}
     const hx=document.createElement('i');hx.className='hx';hx.textContent='×';hx.title='Bỏ khỏi danh sách';hx.onclick=e=>{e.stopPropagation();dropThread(id);};b.appendChild(hx);
-    b.onclick=()=>openChat(a);box.appendChild(b);
+    b.onclick=()=>openChat(a);allBtns.push(b);
   });
+  // Trên máy tính: quá 6 cuộc thì chỉ hiện 5 avatar, phần còn lại gom vào nút +N (kiểu Messenger)
+  const cap=(window.innerWidth>640&&allBtns.length>6)?5:allBtns.length;
+  allBtns.slice(0,cap).forEach(b=>box.appendChild(b));
+  const hid=allBtns.slice(cap);
+  if(hid.length){
+    const mb=document.createElement('button');mb.type='button';mb.className='tav more';mb.textContent='+'+hid.length;mb.title='Xem thêm '+hid.length+' cuộc trò chuyện';
+    const pop=document.createElement('div');pop.className='morePop';pop.hidden=true;
+    hid.forEach(h=>{const it=document.createElement('button');it.type='button';it.className='mpItem';it.textContent=h.title;it.onclick=()=>{pop.hidden=true;h.click();};pop.appendChild(it);});
+    mb.onclick=e=>{e.stopPropagation();pop.hidden=!pop.hidden;};
+    box.appendChild(mb);document.body.appendChild(pop);
+  }
 }
+document.addEventListener('click',e=>{const p=document.querySelector('.morePop');if(p&&!p.hidden&&!e.target.closest('.morePop')&&!e.target.closest('.tav.more'))p.hidden=true;});
 function dropThread(id){
   threads=threads.filter(x=>x!==id);delete seen[id];delete known[id];saveThreads();
   if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);}
