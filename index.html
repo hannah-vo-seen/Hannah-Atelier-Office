@@ -590,9 +590,10 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 #chat,#chat .log{overscroll-behavior:contain}
 html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden}
 .bcol{overflow-x:hidden}
-.bcol h3{position:sticky;top:0;z-index:2;background:var(--card);margin:-14px -14px 10px;padding:14px 14px 10px;border-radius:20px 20px 0 0;white-space:nowrap}
+.bcol h3{position:sticky;top:0;z-index:2;background:#ffffff;box-shadow:0 6px 10px -6px rgba(40,30,80,.25);margin:-14px -14px 10px;padding:14px 14px 10px;border-radius:20px 20px 0 0;white-space:nowrap}
 .board{margin-bottom:28px}
 @media (max-width:640px){details.settings{margin-bottom:calc(env(safe-area-inset-bottom,0px) + 72px)!important;padding-bottom:12px}}
+body:not(.light) .bcol h3{background:#1d2033}
 </style>
 </head>
 <body>
