@@ -1387,7 +1387,7 @@ function renderThreads(){
 document.addEventListener('click',e=>{const p=document.querySelector('.morePop');if(p&&!p.hidden&&!e.target.closest('.morePop')&&!e.target.closest('.tav.more'))p.hidden=true;});
 function dropThread(id){
   threads=threads.filter(x=>x!==id);delete seen[id];delete known[id];saveThreads();
-  if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;clearInterval(chatTimer);clearInterval(threadTimer);}
+  if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');clearInterval(chatTimer);clearInterval(threadTimer);}
   renderThreads();
 }
 async function checkInbox(){
