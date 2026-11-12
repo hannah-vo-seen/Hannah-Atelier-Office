@@ -571,7 +571,13 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
   .heads .tav .tn small{display:none}
   .heads .tav .tn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
-@media (min-width:641px){.heads .tav .tn{display:none}.heads .tav:hover .tn,.heads .tav:focus-visible .tn{display:block}.heads .tav:hover,.heads .tav:focus-visible{z-index:5}}
+@media (min-width:641px){
+  .heads{gap:8px!important}
+  .heads .tav{width:40px;height:40px}
+  .heads .tav .tn{display:none;left:auto;right:100%;top:50%;transform:translateY(-50%);margin:0 10px 0 0;width:max-content;max-width:200px;text-align:right;white-space:nowrap}
+  .heads .tav:hover .tn,.heads .tav:focus-visible .tn{display:block}
+  .heads .tav:hover,.heads .tav:focus-visible{z-index:5}
+}
 </style>
 </head>
 <body>
