@@ -466,7 +466,7 @@ body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 
 .dcard.sphere{background:radial-gradient(circle at 50% 42%,#2a1450 0%,#0e0820 58%,#06040d 100%);color:#f4f0ff;border-color:rgba(176,107,255,.45);box-shadow:inset 0 0 0 1px rgba(176,107,255,.25),0 0 40px -10px rgba(155,77,255,.7)}
 .gridbg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(176,107,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(176,107,255,.09) 1px,transparent 1px);background-size:36px 36px;-webkit-mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);mask-image:radial-gradient(circle at 50% 50%,#000 25%,transparent 78%);pointer-events:none}
-.scan{position:absolute;left:0;right:0;height:90px;z-index:1;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(197,155,255,.16),transparent);animation:scan 5.5s linear infinite}
+.scan{display:none}
 @keyframes scan{from{top:-90px}to{top:100%}}
 .cnr{position:absolute;width:22px;height:22px;border:1.5px solid #c59bff;z-index:4;opacity:.85;pointer-events:none}
 .cnr.a{top:10px;left:10px;border-right:0;border-bottom:0}.cnr.b{top:10px;right:10px;border-left:0;border-bottom:0}.cnr.c{bottom:10px;left:10px;border-right:0;border-top:0}.cnr.d{bottom:10px;right:10px;border-left:0;border-top:0}
