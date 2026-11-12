@@ -697,7 +697,12 @@ const $=id=>document.getElementById(id);
 const stage=$('stage'),cv=$('cv'),lab=$('lab');
 
 /* ---------- three.js ---------- */
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});}
+catch(err){console.warn('Không tạo được WebGL, quả cầu 3D tắt; phần còn lại vẫn chạy.',err);
+  // Máy không bật được WebGL: dùng bản giả để mọi dòng code 3D vẫn chạy, quả cầu không hiện nhưng danh sách agent và đồng hồ vẫn hoạt động
+  const noop=()=>{};const fake=new Proxy(function(){},{get:(t,k)=>k==='domElement'?cv:(k==='then'?undefined:(typeof k==='string'&&/^(set|render|dispose|clear|setAnimationLoop|compile)/.test(k)?noop:(typeof k==='symbol'?undefined:fake))),set:()=>true,apply:()=>fake});
+  renderer=fake;}
 renderer.setClearColor(0x000000,0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 const scene=new THREE.Scene();
