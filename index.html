@@ -321,7 +321,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 #chatBack.on{display:block}
 #chat.big{left:16px;right:auto;width:calc(100vw - 130px);height:calc(100vh - 40px);bottom:20px;transform:none}
 @media (max-width:640px){#chat.big{left:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);bottom:8px}}
-@media (max-width:640px){body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 56px)}details.settings{margin-bottom:24px}}
+@media (max-width:640px){body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 56px)}details.settings{margin-bottom:40px}}
 .sphere{min-height:480px;padding:0}
 .planetbox{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center}
 .planetbox .bubble{height:92%;width:auto;max-width:92%;aspect-ratio:1;object-fit:contain;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 40px var(--gc));transition:filter .5s}
@@ -565,7 +565,7 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 #splash span{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:22px;color:#fff;text-shadow:0 2px 14px rgba(90,60,160,.55);letter-spacing:.3px}
 @media (max-width:640px){html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden;height:100%}}
 @media(max-width:640px){
-  .heads{display:grid!important;grid-template-columns:repeat(4,1fr)!important;overflow:visible!important;justify-items:center;padding:10px 8px calc(env(safe-area-inset-bottom,0px) + 56px)!important;gap:18px 4px!important}
+  .heads{display:grid!important;grid-template-columns:repeat(4,1fr)!important;overflow:visible!important;justify-items:center;padding:10px 8px calc(env(safe-area-inset-bottom,0px) + 56px)!important;gap:44px 4px!important}
   .heads .tav{margin:0!important}
   .heads .tav .tn{width:84px;max-width:84px}
   .heads .tav .tn small{display:none}
@@ -1509,6 +1509,8 @@ function fitChat(){
 }
 if(window.visualViewport){visualViewport.addEventListener('resize',fitChat);visualViewport.addEventListener('scroll',fitChat);}
 window.addEventListener('resize',fitChat);
+// Trên điện thoại: đưa mục Cài đặt xuống dưới cùng, sau hàng avatar agent
+try{if(window.innerWidth<=640){const st=document.querySelector('details.settings'),hd=document.getElementById('heads');if(st&&hd&&hd.parentNode)hd.parentNode.insertBefore(st,hd.nextSibling);}}catch(e){}
 let sending=false;let sendQueue=[];
 $('chatZoom').onclick=()=>{const big=$('chat').classList.toggle('big');$('chatBack').classList.toggle('on',big);$('chatZoom').textContent=big?'⤡':'⤢';$('chatZoom').title=big?'Thu nhỏ':'Mở rộng';};
 $('chatAva').ondblclick=()=>{const m=$('mascot');m.hidden=!m.hidden;};
