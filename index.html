@@ -131,7 +131,7 @@ body.list-mode.light .sc i,body.list-mode.light .mut,body.list-mode.light th{col
 body.list-mode.light td{color:#1b2433}
 #chatLog .tw th{color:#2b2f45;background:rgba(155,120,255,.14)}
 .cimg{display:block;max-width:min(260px,100%);border-radius:16px;margin:6px 0;box-shadow:0 6px 18px rgba(120,100,200,.25)}
-.cimgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.cimgs .cimg{margin:0;max-width:150px}
+.cimgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.cimgs .cimg{margin:0;max-width:150px}.fchip{display:inline-flex;align-items:center;max-width:100%;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.85);border:1px solid rgba(150,130,220,.45);color:#2b2f45;font-size:13px;line-height:1.3;overflow-wrap:anywhere;box-shadow:0 2px 8px rgba(120,100,200,.18)}
 #chatLog .tw td{color:#2b2f45}
 body.list-mode.light .pill-f{background:rgba(255,255,255,.7);color:#1b2433;border-color:rgba(255,255,255,.95)}
 body.list-mode.light .pill-f.on{background:linear-gradient(90deg,#b19cff,#7fb6ff);color:#fff}
@@ -1507,7 +1507,7 @@ function attachSwipe(d,text){
   d.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];const dx=sx-t.clientX,dy=Math.abs(t.clientY-sy);if(dy>24){on=false;d.style.transform='';return;}d.style.transform='translateX('+(-Math.min(Math.max(dx,0),80))+'px)';},{passive:true});
   d.addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0];const dx=sx-t.clientX;d.style.transition='transform .15s';d.style.transform='';setTimeout(()=>{d.style.transition='';},160);if(dx>=60){replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();}});
 }
-function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){renderMine(d,text);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
+function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){const rest=String(text).replace(/^\[đính kèm: [^\]]+\]\s*/,'');if(rest.trim())renderMine(d,rest);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
   attachSwipe(d,text);
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';w.append(im,d);$('chatLog').appendChild(w);}}
 let lastSig={};
@@ -1583,7 +1583,7 @@ const isImgFile=f=>/^image\//.test(f.type||'')||/\.(jpe?g|png|webp|gif|heic|heif
 const THUMBS_KEY='vpd-thumbs';
 // Lưu bản xem trước nhỏ (360px) theo tên file để hiện lại khi tải lịch sử
 function saveThumb(name,src){try{const im=new Image();im.onload=()=>{try{const k=Math.min(1,360/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const o=LS.get(THUMBS_KEY,{});o[name]=c.toDataURL('image/jpeg',0.6);const ks=Object.keys(o);while(ks.length>30){delete o[ks.shift()];}LS.set(THUMBS_KEY,o);}catch(e){}};im.src=src;}catch(e){}}
-function addSavedThumbs(d,text){try{const mm=String(text||'').match(/^\[đính kèm: ([^\]]+)\]/);if(!mm)return;const o=LS.get(THUMBS_KEY,{});const names=mm[1].split(',').map(x=>x.trim()).filter(n=>o[n]);if(!names.length)return;const box=document.createElement('div');box.className='cimgs';names.forEach(n=>{const im=document.createElement('img');im.className='cimg';im.alt=n;im.src=o[n];box.appendChild(im);});d.appendChild(box);}catch(e){}}
+function addSavedThumbs(d,text){try{const mm=String(text||'').match(/^\[đính kèm: ([^\]]+)\]/);if(!mm)return;const o=LS.get(THUMBS_KEY,{});const names=mm[1].split(',').map(x=>x.trim()).filter(Boolean);if(!names.length)return;const box=document.createElement('div');box.className='cimgs';names.forEach(n=>{if(o[n]){const im=document.createElement('img');im.className='cimg';im.alt=n;im.src=o[n];box.appendChild(im);}else{const c=document.createElement('span');c.className='fchip';c.textContent='📎 '+n;box.appendChild(c);}});d.appendChild(box);}catch(e){}}
 function addThumbs(files){
   try{
     const imgs=(files||[]).filter(f=>/^image\//.test(f.type||''));
