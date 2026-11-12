@@ -425,7 +425,7 @@ body.list-mode .pill-f.on:not(.all)::before{background:#fff;box-shadow:none}
 .bitem{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.55);margin-bottom:8px;font-size:13px}
 body:not(.light) .bitem{background:rgba(255,255,255,.07)}
 .bitem small{display:block;opacity:.7;margin-top:3px;font-size:12px}
-.bcol,.bitem{min-width:0}.bcol{overflow-y:auto;max-height:340px}.dcard.sphere:has(.gcard) .pin:not(.on){display:none!important}.dcard.sphere .gcard{z-index:5!important}.bitem{overflow-wrap:anywhere;word-break:break-word}
+.bcol,.bitem{min-width:0}.bcol{overflow:hidden}.blist{max-height:340px;overflow-y:auto;overflow-x:hidden;padding-right:2px}.dcard.sphere:has(.gcard) .pin:not(.on){display:none!important}.dcard.sphere .gcard{z-index:5!important}.bitem{overflow-wrap:anywhere;word-break:break-word}
 @media(max-width:1000px){.ostrip{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}}
 #chat header #chatTitle{flex:1;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 #chat header #chatClose{flex:none;white-space:nowrap;margin-left:8px}
@@ -590,15 +590,15 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 #chat,#chat .log{overscroll-behavior:contain}
 html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden}
 .bcol{overflow-x:hidden}
-.bcol h3{position:sticky;top:0;z-index:2;background:#ffffff;box-shadow:0 6px 10px -6px rgba(40,30,80,.25);margin:-14px -14px 10px;padding:14px 14px 10px;border-radius:20px 20px 0 0;white-space:nowrap}
+.bcol h3{white-space:nowrap}
 .board{margin-bottom:28px}
 @media (max-width:640px){details.settings{margin-bottom:calc(env(safe-area-inset-bottom,0px) + 72px)!important;padding-bottom:12px}}
 body:not(.light) .bcol h3{background:#1d2033}
-.bcol{scrollbar-width:thin;scrollbar-color:rgba(150,125,230,.45) transparent}
-.bcol::-webkit-scrollbar{width:6px}
-.bcol::-webkit-scrollbar-track{background:transparent}
-.bcol::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(170,150,240,.45));border-radius:99px;border:1px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(160,140,255,.25)}
-.bcol::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(170,150,240,.6))}
+.blist{scrollbar-width:thin;scrollbar-color:rgba(150,125,230,.45) transparent}
+.blist::-webkit-scrollbar{width:6px}
+.blist::-webkit-scrollbar-track{background:transparent}
+.blist::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(170,150,240,.45));border-radius:99px;border:1px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(160,140,255,.25)}
+.blist::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(170,150,240,.6))}
 </style>
 </head>
 <body>
@@ -1252,9 +1252,9 @@ function renderCols(){
       const dot=ce('i');dot.style.background=col;
       h3.append(arrow,dot,ce('span',null,title+' · '+total));
       h3.onclick=()=>{boOpen[key]=!open;renderCols();};
-      bc.appendChild(h3);
+      bc.appendChild(h3);const lst=ce('div','blist');bc.appendChild(lst);
       if(open){
-        if(!arr.length)bc.appendChild(ce('div','mut','Chưa có việc'));
+        if(!arr.length)lst.appendChild(ce('div','mut','Chưa có việc'));
         arr.forEach(t=>{
           const it=ce('div','bitem');it.style.borderLeft='3px solid '+col;
           const a=all.find(x=>x.id===t.agent);
@@ -1278,7 +1278,7 @@ function renderCols(){
           } else {
             it.append(ce('small',null,who+(t.doneAt?' · xong '+fmtD(t.doneAt):'')));
           }
-          bc.appendChild(it);
+          lst.appendChild(it);
         });
       }
       bd.appendChild(bc);
