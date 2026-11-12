@@ -594,6 +594,11 @@ html:has(#chat:not([hidden])),body:has(#chat:not([hidden])){overflow:hidden}
 .board{margin-bottom:28px}
 @media (max-width:640px){details.settings{margin-bottom:calc(env(safe-area-inset-bottom,0px) + 72px)!important;padding-bottom:12px}}
 body:not(.light) .bcol h3{background:#1d2033}
+.bcol{scrollbar-width:thin;scrollbar-color:rgba(150,125,230,.45) transparent}
+.bcol::-webkit-scrollbar{width:6px}
+.bcol::-webkit-scrollbar-track{background:transparent}
+.bcol::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(170,150,240,.45));border-radius:99px;border:1px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(160,140,255,.25)}
+.bcol::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(170,150,240,.6))}
 </style>
 </head>
 <body>
