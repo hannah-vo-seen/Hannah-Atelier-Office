@@ -567,10 +567,11 @@ html.typing *{animation-play-state:paused!important;transition:none!important;ba
 @media(max-width:640px){
   .heads{display:grid!important;grid-template-columns:repeat(4,1fr)!important;overflow:visible!important;justify-items:center;padding:10px 8px calc(env(safe-area-inset-bottom,0px) + 56px)!important;gap:44px 4px!important}
   .heads .tav{margin:0!important}
-  .heads .tav .tn{width:84px;max-width:84px}
+  .heads .tav .tn{display:block;width:84px;max-width:84px}
   .heads .tav .tn small{display:none}
   .heads .tav .tn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+@media (min-width:641px){.heads .tav .tn{display:none}.heads .tav:hover .tn,.heads .tav:focus-visible .tn{display:block}.heads .tav:hover,.heads .tav:focus-visible{z-index:5}}
 </style>
 </head>
 <body>
