@@ -1406,7 +1406,7 @@ function renderThreads(){
 document.addEventListener('click',e=>{const p=document.querySelector('.morePop');if(p&&!p.hidden&&!e.target.closest('.morePop')&&!e.target.closest('.tav.more'))p.hidden=true;});
 function dropThread(id){
   threads=threads.filter(x=>x!==id);delete seen[id];delete known[id];saveThreads();
-  if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');clearInterval(chatTimer);clearInterval(threadTimer);}
+  if(chatA&&chatA.id===id){chatA=null;$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');clearInterval(chatTimer);clearInterval(threadTimer);restoreScroll();}
   renderThreads();
 }
 async function checkInbox(){
@@ -1495,6 +1495,9 @@ let replyTo=null;
 const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='Huỷ trả lời';x.title='Bỏ trả lời (Esc)';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
 const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,200)}]]\n${t}`;
 const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
+// Nhớ vị trí trang trước khi mở chat trên điện thoại, để khi đóng chat trang không bị nhảy lên đầu
+let chatScrollY=0;
+const restoreScroll=()=>{const y=chatScrollY;window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));setTimeout(()=>window.scrollTo(0,y),120);};
 const jumpTo=(snip)=>{const norm=x=>String(x).replace(/\s+/g,' ').trim();const key=norm(snip).slice(0,30);const hit=[...$('chatLog').querySelectorAll('.m.b')].find(x=>norm(x.textContent).includes(key));if(!hit)return;hit.scrollIntoView({block:'center',behavior:'smooth'});hit.classList.add('hl');setTimeout(()=>hit.classList.remove('hl'),1500);};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtInline=t=>esc(t).replace(/https?:\/\/[^\s<"]+/g,u=>{const m=u.match(/^(.*?)([.,;:!?)]*)$/);return '<a href="'+m[1]+'" target="_blank" rel="noopener">'+m[1]+'</a>'+m[2];}).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
@@ -1548,7 +1551,7 @@ function openChat(a){
   pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,10000);
   if(window.innerWidth>640){$('chat').classList.add('big');$('chatBack').classList.add('on');$('chatZoom').textContent='⤡';$('chatZoom').title='Thu nhỏ';}
   fitChat();
-  if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
+  if(window.innerWidth<=640){if($('chat').hidden)chatScrollY=window.scrollY;setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);}
 }
 // Trên điện thoại: khung chat bám đúng vùng nhìn thấy khi bàn phím mở, không để lộ nền bên dưới
 function fitChat(){
@@ -1644,7 +1647,7 @@ $('chatWipe').onclick=async()=>{
     $('chatLog').textContent='';$('chatNote').textContent='Đã xoá lịch sử và file.';
   }catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
 };
-$('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);};
+$('chatClose').onclick=()=>{replyTo=null;showReply();$('chat').hidden=true;$('chat').classList.remove('big');$('chatBack').classList.remove('on');$('chatZoom').textContent='⤢';$('chatZoom').title='Mở rộng';clearInterval(chatTimer);clearInterval(threadTimer);restoreScroll();};
 // Gửi tin xếp hàng ngầm: không cần mở lại chat của agent đó, chạy tuần tự từng tin
 let queueBusy=false;
 async function pumpQueue(){
