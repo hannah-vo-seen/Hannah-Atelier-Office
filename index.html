@@ -599,7 +599,7 @@ body:not(.light) .bcol h3{background:#1d2033}
 .blist::-webkit-scrollbar-track{background:transparent}
 .blist::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(170,150,240,.45));border-radius:99px;border:1px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(160,140,255,.25)}
 .blist::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(170,150,240,.6))}
-#chat textarea{scrollbar-width:none}#chat textarea::-webkit-scrollbar{display:none}
+#chat textarea,#chatIn{scrollbar-width:none!important;-ms-overflow-style:none}#chat textarea::-webkit-scrollbar,#chatIn::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
 </style>
 </head>
 <body>
@@ -1717,7 +1717,7 @@ $('chatIn').addEventListener('keydown',e=>{
   else if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();hideMention();}
 });
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
-let resizeQ=0;$('chatIn').addEventListener('input',()=>{typingAt=performance.now();document.documentElement.classList.add('typing');clearTimeout(typingT);typingT=setTimeout(()=>document.documentElement.classList.remove('typing'),1200);const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;if(!resizeQ)resizeQ=requestAnimationFrame(()=>{resizeQ=0;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';});});
+let resizeQ=0;$('chatIn').addEventListener('input',()=>{typingAt=performance.now();document.documentElement.classList.add('typing');clearTimeout(typingT);typingT=setTimeout(()=>document.documentElement.classList.remove('typing'),1200);const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;if(!resizeQ)resizeQ=requestAnimationFrame(()=>{resizeQ=0;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';t.style.overflowY=t.scrollHeight>120?'auto':'hidden';});});
 $('chatForm').onsubmit=async e=>{
   e.preventDefault();
   const mention=findMention($('chatIn').value.trim());
