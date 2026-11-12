@@ -1526,6 +1526,7 @@ function openChat(a){
   loadHist().catch(e=>$('chatNote').textContent='Lỗi: '+e.message);
   chatTimer=setInterval(()=>{if(!sending)loadHist().catch(()=>{})},8000);
   pollThreads();clearInterval(threadTimer);threadTimer=setInterval(pollThreads,10000);
+  if(window.innerWidth>640){$('chat').classList.add('big');$('chatBack').classList.add('on');$('chatZoom').textContent='⤡';$('chatZoom').title='Thu nhỏ';}
   fitChat();
   if(window.innerWidth<=640)setTimeout(()=>$('chat').scrollIntoView({behavior:'smooth',block:'start'}),60);
 }
