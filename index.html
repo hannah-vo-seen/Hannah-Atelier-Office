@@ -552,6 +552,12 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .m .gl{position:absolute;right:8px;bottom:4px;line-height:0}
 .m .gl img{width:14px;height:14px;display:block;border-radius:50%}
 .m .gl.on{opacity:1;filter:none}
+.m{position:relative}
+.mtb{position:absolute;top:-14px;right:4px;display:none;gap:2px;background:#fff;border-radius:999px;box-shadow:0 6px 16px rgba(120,100,200,.25);padding:3px;z-index:2}
+.m:hover .mtb,.m.tb .mtb{display:flex}
+.mtb button{border:0;background:transparent;color:#5b3fc0;width:26px;height:26px;border-radius:999px;display:grid;place-items:center;cursor:pointer;padding:0}
+.mtb button:hover{background:rgba(138,111,214,.14)}
+.mtb button.ok{color:#2e9d5b}
 html.typing *{animation-play-state:paused!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 /* Điện thoại: khung chat phóng to phải phủ kín màn hình, không bị kéo lệch */
 @media (max-width:640px){#chat.big{position:fixed!important;top:8px!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;transform:none!important;z-index:60!important}}
@@ -1530,8 +1536,22 @@ function attachSwipe(d,text){
   d.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];const dx=sx-t.clientX,dy=Math.abs(t.clientY-sy);if(dy>24){on=false;d.style.transform='';return;}d.style.transform='translateX('+(-Math.min(Math.max(dx,0),80))+'px)';},{passive:true});
   d.addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0];const dx=sx-t.clientX;d.style.transition='transform .15s';d.style.transform='';setTimeout(()=>{d.style.transition='';},160);if(dx>=60){replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();}});
 }
+// Nút sao chép và trả lời khi rê chuột (máy tính) hoặc chạm tin (điện thoại). Không có nút cảm xúc.
+function addMsgTools(d,text,mine){
+  const raw=String(text).replace(/^\[\[tra_loi\|[^\]]*\]\]\n?/,'').replace(/^\[đính kèm: [^\]]+\]\s*/,'');
+  const bar=document.createElement('div');bar.className='mtb';
+  const cp=document.createElement('button');cp.type='button';cp.title='Sao chép';cp.setAttribute('aria-label','Sao chép');
+  cp.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  cp.onclick=e=>{e.stopPropagation();const ok=()=>{cp.classList.add('ok');setTimeout(()=>cp.classList.remove('ok'),900);};try{navigator.clipboard.writeText(raw).then(ok,()=>{});}catch(_){}};
+  const rp=document.createElement('button');rp.type='button';rp.title='Trả lời';rp.setAttribute('aria-label','Trả lời');
+  rp.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/></svg>';
+  rp.onclick=e=>{e.stopPropagation();replyTo={name:mine?'Hannah':((chatA&&chatA.name)||''),text:raw};showReply();$('chatIn').focus();};
+  bar.append(cp,rp);d.appendChild(bar);
+  d.addEventListener('click',e=>{if(e.target.closest('.mtb'))return;if(CHAT_TOUCH){const was=d.classList.contains('tb');document.querySelectorAll('.m.tb').forEach(x=>x.classList.remove('tb'));if(!was)d.classList.add('tb');}});
+}
 function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){const rest=String(text).replace(/^\[đính kèm: [^\]]+\]\s*/,'');if(rest.trim())renderMine(d,rest);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
   attachSwipe(d,text);
+  addMsgTools(d,text,mine);
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';
     // Tin giao việc: thêm nút Duyệt / Không duyệt. Bấm là gửi lệnh rõ mã việc cho agent.
     const tm=String(text).match(/Giao việc\s+([A-Za-z]{1,4}-\d+)/);
