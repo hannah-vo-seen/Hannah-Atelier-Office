@@ -1675,10 +1675,10 @@ $('chatFile').onchange=async e=>{
   const list=[...(e.target.files||[])];e.target.value='';
   if(!list.length)return;
   const total=list.reduce((n,f)=>n+f.size,0)+pendingFiles.reduce((n,f)=>n+f.data.length*0.75,0);
-  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, chị bớt bớt file nhé.';return;}
+  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, Hannah bớt bớt file nhé.';return;}
   for(const f of list){
     try{pendingFiles.push(isImgFile(f)?await shrinkImg(f):await readFile(f));}
-    catch(err){$('chatNote').textContent='Không đọc được file '+(f.name||'')+', chị thử chọn lại nhé.';}
+    catch(err){$('chatNote').textContent='Không đọc được file '+(f.name||'')+', Hannah thử chọn lại nhé.';}
   }
   showPending();
 };
@@ -1687,7 +1687,7 @@ document.addEventListener('paste',async e=>{
   if(!fl.length||!chatA||$('chat').hidden||sending)return;
   e.preventDefault();
   const total=fl.reduce((n,f)=>n+f.size,0)+pendingFiles.reduce((n,f)=>n+f.data.length*0.75,0);
-  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, chị bớt bớt file nhé.';return;}
+  if(total>22*1024*1024){$('chatNote').textContent='Tổng file quá 22MB, Hannah bớt bớt file nhé.';return;}
   for(const f of fl){
     const named=(f.name&&f.name!=='image.png')?f:new File([f],'anh-chup-'+Date.now()+'.png',{type:f.type});
     pendingFiles.push(await readFile(named));
@@ -1813,7 +1813,7 @@ $('chatForm').onsubmit=async e=>{
   try{
     const sendTxt=encSend;replyTo=null;showReply();
     $('chatLog').scrollTop=1e9;
-    const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, chị thử gửi lại nhé')),240000))]);await loadHist();
+    const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, Hannah thử gửi lại nhé')),240000))]);await loadHist();
     $('chatLog').scrollTop=1e9;
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
