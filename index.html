@@ -1797,7 +1797,7 @@ $('chatForm').onsubmit=async e=>{
   try{
     const sendTxt=encSend;replyTo=null;showReply();
     $('chatLog').scrollTop=1e9;
-    const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, chị thử gửi lại nhé')),files.length?240000:60000))]);await loadHist();
+    const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, chị thử gửi lại nhé')),240000))]);await loadHist();
     $('chatLog').scrollTop=1e9;
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
