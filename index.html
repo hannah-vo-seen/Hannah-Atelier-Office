@@ -1616,12 +1616,18 @@ function addSavedThumbs(d,text){try{const mm=String(text||'').match(/^\[đính k
 function addThumbs(files){
   try{
     const imgs=(files||[]).filter(f=>/^image\//.test(f.type||''));
-    if(!imgs.length)return;
+    const pdfs=(files||[]).filter(f=>/pdf/i.test(f.type||'')||/\.pdf$/i.test(f.name||''));
+    if(!imgs.length&&!pdfs.length)return;
     const last=$('chatLog').lastElementChild;if(!last)return;
     last.querySelectorAll('.cimgs').forEach(x=>x.remove());
     imgs.forEach(f=>saveThumb(f.name,'data:'+f.type+';base64,'+f.data));
     const box=document.createElement('div');box.className='cimgs';
     imgs.forEach(f=>{const im=document.createElement('img');im.className='cimg';im.alt=f.name||'';im.src='data:'+f.type+';base64,'+f.data;box.appendChild(im);});
+    pdfs.forEach(f=>{
+      const a=document.createElement('a');a.className='fchip';a.href='#';a.textContent='📄 '+(f.name||'file.pdf')+' (mở)';
+      a.onclick=e=>{e.preventDefault();try{const bin=atob(f.data);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);const url=URL.createObjectURL(new Blob([arr],{type:'application/pdf'}));window.open(url,'_blank');}catch(err){$('chatNote').textContent='Không mở được PDF này';}};
+      box.appendChild(a);
+    });
     last.appendChild(box);
   }catch(e){}
 }
