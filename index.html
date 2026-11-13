@@ -1599,7 +1599,9 @@ async function loadHist(){
   known[chatA.id]=total;seen[chatA.id]=total;saveThreads();renderThreads();
   lastHistArr[chatA.id]=d.history;
   const sig=JSON.stringify(d.history);
-  if(lastSig[chatA.id]===sig)return;
+  // Dọn tin chờ đã có trong lịch sử ngay cả khi lịch sử không đổi, để thẻ chờ kẹt lại tự mất
+  const pendTruoc=(pendOut[chatA.id]||[]).length;pendPrune(chatA.id,d.history);const pendDoi=(pendOut[chatA.id]||[]).length!==pendTruoc;
+  if(lastSig[chatA.id]===sig&&!pendDoi)return;
   const log=$('chatLog');
   const first=!lastSig[chatA.id];
   const wasBottom=log.scrollHeight-log.scrollTop-log.clientHeight<40;
