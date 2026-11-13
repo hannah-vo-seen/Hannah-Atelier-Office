@@ -1584,14 +1584,18 @@ let lastSig={};
 const PEND_KEY='pendOutV1';
 let pendOut={};try{pendOut=JSON.parse(localStorage.getItem(PEND_KEY)||'{}')||{};}catch(_){pendOut={};}
 const savePend=()=>{try{localStorage.setItem(PEND_KEY,JSON.stringify(pendOut));}catch(_){}};
-function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push(txt);savePend();}
-function pendPrune(id,hist){pendOut[id]=(pendOut[id]||[]).filter(t=>!hist.some(m=>m.role==='user'&&String(m.content).endsWith(t)));savePend();}
-function pendRender(id){(pendOut[id]||[]).forEach(t=>bubble(t,true));}
+// Mỗi tin chờ nhớ số tin cùng nội dung đã có trong lịch sử lúc gửi (c), để gửi lại một câu giống câu cũ không bị coi là "đã có" rồi biến mất
+const lastHistArr={};
+const pendDem=(hist,t)=>(hist||[]).filter(m=>m.role==='user'&&String(m.content).endsWith(t)).length;
+function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push({t:txt,c:pendDem(lastHistArr[id],txt)});savePend();}
+function pendPrune(id,hist){const daBo={};pendOut[id]=(pendOut[id]||[]).filter(p=>{const t=(p&&p.t!=null)?p.t:String(p);const c=(p&&p.c!=null)?p.c:0;const moi=pendDem(hist,t)-c-(daBo[t]||0);if(moi>0){daBo[t]=(daBo[t]||0)+1;return false;}return true;});savePend();}
+function pendRender(id){(pendOut[id]||[]).forEach(p=>bubble((p&&p.t!=null)?p.t:String(p),true));}
 async function loadHist(){
   if(performance.now()-typingAt<1200)return;
   const d=await api('/history',{});
   const total=(d.total!=null)?d.total:replyCount(d.history);
   known[chatA.id]=total;seen[chatA.id]=total;saveThreads();renderThreads();
+  lastHistArr[chatA.id]=d.history;
   const sig=JSON.stringify(d.history);
   if(lastSig[chatA.id]===sig)return;
   const log=$('chatLog');
@@ -1661,7 +1665,8 @@ function addThumbs(files){
   try{
     const imgs=(files||[]).filter(f=>/^image\//.test(f.type||''));
     const pdfs=(files||[]).filter(f=>/pdf/i.test(f.type||'')||/\.pdf$/i.test(f.name||''));
-    if(!imgs.length&&!pdfs.length)return;
+    const khac=(files||[]).filter(f=>!imgs.includes(f)&&!pdfs.includes(f));
+    if(!imgs.length&&!pdfs.length&&!khac.length)return;
     const last=$('chatLog').lastElementChild;if(!last)return;
     last.querySelectorAll('.cimgs').forEach(x=>x.remove());
     imgs.forEach(f=>saveThumb(f.name,'data:'+f.type+';base64,'+f.data));
@@ -1672,6 +1677,8 @@ function addThumbs(files){
       a.onclick=e=>{e.preventDefault();try{const bin=atob(f.data);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);const url=URL.createObjectURL(new Blob([arr],{type:'application/pdf'}));window.open(url,'_blank');}catch(err){$('chatNote').textContent='Không mở được PDF này';}};
       box.appendChild(a);
     });
+    // File khác (CSV, Excel, Word...): hiện thẻ tên file ngay khi gửi, không chờ agent trả lời
+    khac.forEach(f=>{const c=document.createElement('span');c.className='fchip';c.textContent='📎 '+(f.name||'file');box.appendChild(c);});
     last.appendChild(box);
   }catch(e){}
 }
@@ -1811,8 +1818,8 @@ $('chatForm').onsubmit=async e=>{
   const t=$('chatIn').value.trim();if((!t&&!pendingFiles.length)||!chatA)return;
   const files=pendingFiles;pendingFiles=[];showPending();
   const encSend=replyTo?encodeReply(replyTo,t):t;
-  if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend,true);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
-  if(queueBusy){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend,true);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
+  if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
+  if(queueBusy){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
   let stTimer=null;const stopSt=()=>{if(stTimer)clearInterval(stTimer);stTimer=null;};const startSt=(id)=>{stopSt();stTimer=setInterval(async()=>{try{const s=await api('/status',{agent:id});if(sending&&s&&s.status&&s.status.t)$('chatNote').textContent='👾 Đang '+s.status.t+'…';}catch(e){}},2000);};
   $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';pendAdd(chatA.id,encSend||('📎 '+files.map(f=>f.name).join(', ')));bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);sending=true;startSt(chatA.id);$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
