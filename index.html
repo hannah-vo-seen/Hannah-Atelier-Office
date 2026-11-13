@@ -558,6 +558,8 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .mtb button{border:0;background:transparent;color:#5b3fc0;width:26px;height:26px;border-radius:999px;display:grid;place-items:center;cursor:pointer;padding:0}
 .mtb button:hover{background:rgba(138,111,214,.14)}
 .mtb button.ok{color:#2e9d5b}
+.m.u .mtb{top:50%;right:auto;left:-84px;transform:translateY(-50%)}
+.m.b .mtb{top:50%;right:-84px;transform:translateY(-50%)}
 html.typing *{animation-play-state:paused!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 /* Điện thoại: khung chat phóng to phải phủ kín màn hình, không bị kéo lệch */
 @media (max-width:640px){#chat.big{position:fixed!important;top:8px!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;height:auto!important;max-height:none!important;margin:0!important;transform:none!important;z-index:60!important}}
@@ -1562,9 +1564,12 @@ function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.cl
     w.append(im,d);$('chatLog').appendChild(w);}}
 let lastSig={};
 // Tin đã gửi nhưng server chưa lưu xong: giữ hiển thị trong chat đó tới khi lịch sử có tin
-const pendOut={};
-function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push(txt);}
-function pendPrune(id,hist){pendOut[id]=(pendOut[id]||[]).filter(t=>!hist.some(m=>m.role==='user'&&String(m.content).endsWith(t)));}
+// Lưu tin đang chờ vào trình duyệt để tải lại trang không mất tin; tin nào đã có trong lịch sử thì bỏ khỏi danh sách chờ
+const PEND_KEY='pendOutV1';
+let pendOut={};try{pendOut=JSON.parse(localStorage.getItem(PEND_KEY)||'{}')||{};}catch(_){pendOut={};}
+const savePend=()=>{try{localStorage.setItem(PEND_KEY,JSON.stringify(pendOut));}catch(_){}};
+function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push(txt);savePend();}
+function pendPrune(id,hist){pendOut[id]=(pendOut[id]||[]).filter(t=>!hist.some(m=>m.role==='user'&&String(m.content).endsWith(t)));savePend();}
 function pendRender(id){(pendOut[id]||[]).forEach(t=>bubble(t,true));}
 async function loadHist(){
   if(performance.now()-typingAt<1200)return;
