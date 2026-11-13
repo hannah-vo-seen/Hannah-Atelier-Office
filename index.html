@@ -1549,9 +1549,8 @@ function addMsgTools(d,text,mine){
   bar.append(cp,rp);d.appendChild(bar);
   d.addEventListener('click',e=>{if(e.target.closest('.mtb'))return;if(CHAT_TOUCH){const was=d.classList.contains('tb');document.querySelectorAll('.m.tb').forEach(x=>x.classList.remove('tb'));if(!was)d.classList.add('tb');}});
 }
-function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){const rest=String(text).replace(/^\[đính kèm: [^\]]+\]\s*/,'');if(rest.trim())renderMine(d,rest);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
+function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){const rest=String(text).replace(/^\[đính kèm: [^\]]+\]\s*/,'');if(rest.trim())renderMine(d,rest);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);addMsgTools(d,text,mine);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
   attachSwipe(d,text);
-  addMsgTools(d,text,mine);
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';
     // Tin giao việc: thêm nút Duyệt / Không duyệt. Bấm là gửi lệnh rõ mã việc cho agent.
     const tm=String(text).match(/Giao việc\s+([A-Za-z]{1,4}-\d+)/);
