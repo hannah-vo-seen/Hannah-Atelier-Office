@@ -1532,7 +1532,7 @@ function markRead(id,i){try{const o=JSON.parse(localStorage.getItem(READ_KEY)||'
 function addPlanet(d){const gl=document.createElement('span');gl.className='gl on';const pl=document.createElement('img');pl.src='planet.png';pl.alt='';pl.width=14;pl.height=14;gl.appendChild(pl);d.appendChild(gl);}
 let replyTo=null;
 const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='Huỷ trả lời';x.title='Bỏ trả lời (Esc)';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
-const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,200)}]]\n${t}`;
+const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,3000)}]]\n${t}`;
 const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
 // Nhớ vị trí trang trước khi mở chat trên điện thoại, để khi đóng chat trang không bị nhảy lên đầu
 let chatScrollY=0;
