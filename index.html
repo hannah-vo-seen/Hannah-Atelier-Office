@@ -1823,7 +1823,7 @@ $('chatIn').addEventListener('keydown',e=>{
 const CHAT_TOUCH=window.matchMedia&&matchMedia('(pointer: coarse)').matches;
 $('chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!CHAT_TOUCH){e.preventDefault();$('chatForm').requestSubmit();}if(e.key==='Escape'&&replyTo){e.preventDefault();replyTo=null;showReply();}});
 let resizeQ=0;$('chatIn').addEventListener('input',()=>{typingAt=performance.now();document.documentElement.classList.add('typing');clearTimeout(typingT);typingT=setTimeout(()=>document.documentElement.classList.remove('typing'),1200);const t=$('chatIn');if(chatA)drafts[chatA.id]=t.value;if(!resizeQ)resizeQ=requestAnimationFrame(()=>{resizeQ=0;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';t.style.overflowY=t.scrollHeight>120?'auto':'hidden';});});
-$('chatForm').onsubmit=async e=>{
+$('chatForm').onsubmit=async e=>{const guiCho=chatA?{id:chatA.id,name:chatA.name}:null;const dungChat=()=>!guiCho||(chatA&&chatA.id===guiCho.id);
   e.preventDefault();
   const mention=findMention($('chatIn').value.trim());
   if(mention){
@@ -1845,9 +1845,9 @@ $('chatForm').onsubmit=async e=>{
     $('chatLog').scrollTop=1e9;
     const d=await Promise.race([api('/chat',{message:sendTxt,files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu, Hannah thử gửi lại nhé')),240000))]);await loadHist();
     $('chatLog').scrollTop=1e9;
-    $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
+    if(dungChat())$('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
-  catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
+  catch(err){$('chatNote').textContent=(dungChat()?'😱 Lỗi: ':'😱 Lỗi ở chat '+guiCho.name+' (không phải chat này): ')+err.message;}
   finally{sending=false;stopSt();pumpQueue();}
 };
 
