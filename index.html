@@ -1586,7 +1586,9 @@ let pendOut={};try{pendOut=JSON.parse(localStorage.getItem(PEND_KEY)||'{}')||{};
 const savePend=()=>{try{localStorage.setItem(PEND_KEY,JSON.stringify(pendOut));}catch(_){}};
 // Mỗi tin chờ nhớ số tin cùng nội dung đã có trong lịch sử lúc gửi (c), để gửi lại một câu giống câu cũ không bị coi là "đã có" rồi biến mất
 const lastHistArr={};
-const pendDem=(hist,t)=>(hist||[]).filter(m=>m.role==='user'&&String(m.content).endsWith(t)).length;
+// Tin chỉ có file hiện là "📎 tên file" lúc chờ, còn trong lịch sử là "[đính kèm: tên file]": phải so theo cách đó, nếu không thẻ chờ sẽ nằm lại mãi dưới câu trả lời
+const pendKhop=(c,t)=>{c=String(c);return t.startsWith('📎 ')?c.trim()==='[đính kèm: '+t.slice(3)+']':c.endsWith(t);};
+const pendDem=(hist,t)=>(hist||[]).filter(m=>m.role==='user'&&pendKhop(m.content,t)).length;
 function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push({t:txt,c:pendDem(lastHistArr[id],txt)});savePend();}
 function pendPrune(id,hist){const daBo={};pendOut[id]=(pendOut[id]||[]).filter(p=>{const t=(p&&p.t!=null)?p.t:String(p);const c=(p&&p.c!=null)?p.c:0;const moi=pendDem(hist,t)-c-(daBo[t]||0);if(moi>0){daBo[t]=(daBo[t]||0)+1;return false;}return true;});savePend();}
 function pendRender(id){(pendOut[id]||[]).forEach(p=>bubble((p&&p.t!=null)?p.t:String(p),true));}
