@@ -569,6 +569,9 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
   .m.b .mtb{top:50%;left:auto;right:-84px;transform:translateY(-50%)}
   .m.b .mtb::after{top:-8px;bottom:-8px;right:100%;left:auto;width:34px;height:auto}
 }
+/* Dải trong suốt chạy hết chiều cao bong bóng, phía có nút: rê chuột ngang ra khỏi tin ở bất kỳ độ cao nào vẫn giữ nút hiện */
+.m.u::before{content:'';position:absolute;top:0;bottom:0;right:100%;width:96px}
+@media (min-width:700px){.m.b::before{content:'';position:absolute;top:0;bottom:0;left:100%;width:96px}}
 /* Lật icon trả lời cho chiều mũi tên như bản trước */
 .mtb button[title="Trả lời"] svg{transform:scaleX(-1)}
 html.typing *{animation-play-state:paused!important;transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
@@ -1560,6 +1563,8 @@ function addMsgTools(d,text,mine){
   rp.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/></svg>';
   rp.onclick=e=>{e.stopPropagation();replyTo={name:mine?'Hannah':((chatA&&chatA.name)||''),text:raw};showReply();$('chatIn').focus();};
   bar.append(cp,rp);d.appendChild(bar);
+  // Rời chuột khỏi tin: giữ nút thêm 1,5 giây để kịp bấm; rê sang tin khác thì ẩn nút của tin cũ ngay
+  if(!CHAT_TOUCH){let tbT=null;d.addEventListener('mouseenter',()=>{clearTimeout(tbT);document.querySelectorAll('.m.tb').forEach(x=>{if(x!==d)x.classList.remove('tb');});d.classList.add('tb');});d.addEventListener('mouseleave',()=>{clearTimeout(tbT);tbT=setTimeout(()=>d.classList.remove('tb'),1500);});}
   d.addEventListener('click',e=>{if(e.target.closest('.mtb'))return;if(CHAT_TOUCH){const was=d.classList.contains('tb');document.querySelectorAll('.m.tb').forEach(x=>x.classList.remove('tb'));if(!was)d.classList.add('tb');}});
 }
 function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.className='m '+(mine?'u':'b');if(mine){const rest=String(text).replace(/^\[đính kèm: [^\]]+\]\s*/,'');if(rest.trim())renderMine(d,rest);addSavedThumbs(d,text);}else d.innerHTML=fmt(text);addMsgTools(d,text,mine);if(mine){$('chatLog').appendChild(d);}else{const w=document.createElement('div');w.className='row';const im=document.createElement('img');im.className='rb';im.src='robot.png';im.alt='';d.addEventListener('contextmenu',e=>{e.preventDefault();replyTo={name:(chatA&&chatA.name)||'',text:String(text)};showReply();$('chatIn').focus();});
