@@ -1571,11 +1571,16 @@ function bubble(text,mine,idx,isRead){const d=document.createElement('div');d.cl
   attachSwipe(d,text);
   if(isRead)addPlanet(d);d.ondblclick=()=>{if(!d.querySelector('.gl')){addPlanet(d);markRead(chatA.id,idx);}};d.title='Nhấp đúp để đánh dấu đã đọc';
     // Tin giao việc: thêm nút Duyệt / Không duyệt. Bấm là gửi lệnh rõ mã việc cho agent.
-    const tm=String(text).match(/Giao việc\s+([A-Za-z]{1,4}-\d+)/);
+    // Cũng hiện nút khi agent báo "chờ Hannah duyệt" (ví dụ việc do agent khác chuyển sang), miễn là Hannah chưa trả lời sau tin đó
+    let tm=String(text).match(/Giao việc\s+([A-Za-z]{1,4}-\d+)/);
+    if(!tm&&/(chờ|cần) Hannah duyệt/i.test(String(text))){
+      const sau=(lastHistArr[chatA&&chatA.id]||[]).slice((idx==null?1e9:idx)+1);
+      if(idx!=null&&!sau.some(m=>m.role==='user')){const im2=String(text).match(/\b([A-Za-z]{1,4}-\d+)\b/);tm=[0,im2?im2[1]:''];}
+    }
     if(tm){const id=tm[1].toUpperCase();const bar=document.createElement('div');bar.className='tduyet';
       const mk=(label,cls,msg)=>{const b=document.createElement('button');b.type='button';b.className='tbtn '+cls;b.textContent=label;
         b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.disabled=true);b.classList.add('on');$('chatIn').value=msg;$('chatForm').requestSubmit();};return b;};
-      bar.append(mk('✅ Duyệt','ok','Duyệt '+id+': làm task này ngay'),mk('✖ Không duyệt','no','Không duyệt '+id+': không làm task này'));
+      bar.append(mk('✅ Duyệt','ok',id?'Duyệt '+id+': làm task này ngay':'Duyệt: làm việc đang chờ duyệt ở tin trên ngay'),mk('✖ Không duyệt','no',id?'Không duyệt '+id+': không làm task này':'Không duyệt: không làm việc đang chờ duyệt ở tin trên, huỷ yêu cầu đó'));
       d.appendChild(bar);}
     w.append(im,d);$('chatLog').appendChild(w);}}
 let lastSig={};
