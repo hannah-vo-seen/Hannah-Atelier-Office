@@ -1808,7 +1808,8 @@ $('chatForm').onsubmit=async e=>{
   const encSend=replyTo?encodeReply(replyTo,t):t;
   if(sending){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend,true);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
   if(queueBusy){sendQueue.push({agent:chatA.id,txt:encSend,files});pendAdd(chatA.id,encSend);bubble(encSend,true);$('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';replyTo=null;showReply();$('chatNote').textContent='⏳ Đang xếp hàng gửi: '+sendQueue.length+' tin';return;}
-  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';pendAdd(chatA.id,encSend||('📎 '+files.map(f=>f.name).join(', ')));bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);sending=true;$('chatNote').textContent='👀 Đã nhận';
+  let stTimer=null;const stopSt=()=>{if(stTimer)clearInterval(stTimer);stTimer=null;};const startSt=(id)=>{stopSt();stTimer=setInterval(async()=>{try{const s=await api('/status',{agent:id});if(sending&&s&&s.status&&s.status.t)$('chatNote').textContent='👾 Đang '+s.status.t+'…';}catch(e){}},2000);};
+  $('chatIn').value='';if(chatA)delete drafts[chatA.id];$('chatIn').style.height='';pendAdd(chatA.id,encSend||('📎 '+files.map(f=>f.name).join(', ')));bubble(encSend||('📎 '+files.map(f=>f.name).join(', ')),true);addThumbs(files);sending=true;startSt(chatA.id);$('chatNote').textContent='👀 Đã nhận';
   setTimeout(()=>{if(sending)$('chatNote').textContent='👾 Đang làm';},800);
   try{
     const sendTxt=encSend;replyTo=null;showReply();
@@ -1818,7 +1819,7 @@ $('chatForm').onsubmit=async e=>{
     $('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
   catch(err){$('chatNote').textContent='😱 Lỗi: '+err.message;}
-  finally{sending=false;pumpQueue();}
+  finally{sending=false;stopSt();pumpQueue();}
 };
 
 // ---- Thông báo đẩy: bật bằng nút 🔔 (cần thêm app vào Màn hình chính trên iPhone) ----
