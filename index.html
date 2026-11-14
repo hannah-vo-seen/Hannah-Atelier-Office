@@ -653,6 +653,7 @@ body:not(.light) .bcol h3{background:#1d2033}
 .reloadBtn{border:0;background:rgba(124,92,255,.14);color:inherit;font:inherit;font-size:15px;line-height:1;width:26px;height:26px;border-radius:50%;margin-left:6px;cursor:pointer;vertical-align:middle;padding:0;-webkit-tap-highlight-color:transparent;transition:transform .5s}
 .reloadBtn:active{background:rgba(124,92,255,.3)}
 .reloadBtn.spin{transform:rotate(360deg)}
+#chat .m.u a.ulk{color:#fff;text-decoration:underline;word-break:break-all;-webkit-touch-callout:default}
 </style>
 </head>
 <body>
@@ -1557,7 +1558,8 @@ function addPlanet(d){const gl=document.createElement('span');gl.className='gl o
 let replyTo=null;
 const showReply=()=>{const b=$('replyBar');b.textContent='';b.hidden=!replyTo;if(!replyTo)return;const info=document.createElement('div');info.style.minWidth='0';const bb=document.createElement('b');bb.textContent='Đang trả lời '+(replyTo.name||'');const ss=document.createElement('span');ss.textContent=String(replyTo.text||'').slice(0,140);info.append(bb,ss);const x=document.createElement('button');x.type='button';x.textContent='Huỷ trả lời';x.title='Bỏ trả lời (Esc)';x.onclick=()=>{replyTo=null;showReply();};b.append(info,x);};
 const encodeReply=(r,t)=>`[[tra_loi|${String(r.name||'').replace(/[|\]\n]/g,' ').slice(0,60)}|${String(r.text||'').replace(/[|\]\n]+/g,' ').slice(0,3000)}]]\n${t}`;
-const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){d.textContent=text;return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);d.appendChild(document.createTextNode(mm[3]));};
+const addLinked=(d,t)=>{const re=/https?:\/\/[^\s<"]+/g;let i=0,m;t=String(t);while((m=re.exec(t))){const mm=m[0].match(/^(.*?)([.,;:!?)]*)$/);if(m.index>i)d.appendChild(document.createTextNode(t.slice(i,m.index)));const a=document.createElement('a');a.href=mm[1];a.target='_blank';a.rel='noopener';a.textContent=mm[1];a.className='ulk';d.appendChild(a);if(mm[2])d.appendChild(document.createTextNode(mm[2]));i=m.index+m[0].length;}if(i<t.length)d.appendChild(document.createTextNode(t.slice(i)));};
+const renderMine=(d,text)=>{const mm=String(text).match(/^\[\[tra_loi\|([^|]*)\|([\s\S]*?)\]\]\n?([\s\S]*)$/);if(!mm){addLinked(d,text);return;}const q=document.createElement('div');q.className='q';const bq=document.createElement('b');bq.textContent=mm[1]||'';const sq=document.createElement('span');sq.textContent=mm[2];q.append(bq,sq);q.onclick=()=>jumpTo(mm[2]);d.appendChild(q);addLinked(d,mm[3]);};
 // Nhớ vị trí trang trước khi mở chat trên điện thoại, để khi đóng chat trang không bị nhảy lên đầu
 let chatScrollY=0;
 const restoreScroll=()=>{const y=chatScrollY;window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));setTimeout(()=>window.scrollTo(0,y),120);};
