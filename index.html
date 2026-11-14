@@ -644,6 +644,9 @@ body:not(.light) .bcol h3{background:#1d2033}
 .blist::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(170,150,240,.45));border-radius:99px;border:1px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(160,140,255,.25)}
 .blist::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(170,150,240,.6))}
 #chat textarea,#chatIn{scrollbar-width:none!important;-ms-overflow-style:none}#chat textarea::-webkit-scrollbar,#chatIn::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+.reloadBtn{border:0;background:rgba(124,92,255,.14);color:inherit;font:inherit;font-size:15px;line-height:1;width:26px;height:26px;border-radius:50%;margin-left:6px;cursor:pointer;vertical-align:middle;padding:0;-webkit-tap-highlight-color:transparent;transition:transform .5s}
+.reloadBtn:active{background:rgba(124,92,255,.3)}
+.reloadBtn.spin{transform:rotate(360deg)}
 </style>
 </head>
 <body>
@@ -671,7 +674,7 @@ body:not(.light) .bcol h3{background:#1d2033}
   <header>
     <div>
       <h1><span>Hannah</span> <span class="gx">Atelier Office</span></h1>
-      <div class="sub">Văn phòng agent · giờ Việt Nam <span id="clock">--:--:--</span></div>
+      <div class="sub">Văn phòng agent · giờ Việt Nam <span id="clock">--:--:--</span> <button type="button" id="reloadBtn" class="reloadBtn" title="Tải lại trang (lấy bản mới nhất)" aria-label="Tải lại trang">↻</button></div>
     </div>
     <button id="tb" class="btn" style="position:static;display:none" hidden>☾ Tối</button>
     <div class="stats">
@@ -1389,6 +1392,10 @@ g3d.checked=false;
 /* ---------- data ---------- */
 buildChips();
 function tick(){$('clock').textContent=new Date().toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour12:false})}
+
+// Nút tải lại: xoá bộ nhớ đệm của trang rồi tải bản mới nhất (dùng được trên điện thoại, không cần kéo để làm mới)
+{const rb=$('reloadBtn');if(rb)rb.onclick=async()=>{rb.classList.add('spin');try{if(window.caches&&caches.keys){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}}catch(_){}
+  const u=new URL(location.href);u.searchParams.set('_r',Date.now().toString(36));setTimeout(()=>location.replace(u.toString()),350);};}
 tick();setInterval(tick,1000);
 fetch('agents.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{
   state.agents=d.agents||[];state.activity=d.activity||[];state.tasks=d.tasks||[];
@@ -1847,7 +1854,26 @@ $('chatForm').onsubmit=async e=>{const guiCho=chatA?{id:chatA.id,name:chatA.name
     $('chatLog').scrollTop=1e9;
     if(dungChat())$('chatNote').textContent=d.status==='cho_duyet'?'🤔 Chờ Hannah duyệt':'🔥 Xong';
   }
-  catch(err){$('chatNote').textContent=(dungChat()?'😱 Lỗi: ':'😱 Lỗi ở chat '+guiCho.name+' (không phải chat này): ')+err.message;}
+  catch(err){
+    // "Load failed"/"Failed to fetch"/"quá lâu": kết nối rớt giữa chừng (điện thoại khoá máy, mạng yếu, yêu cầu chạy lâu), nhưng agent thường VẪN chạy xong và đã lưu trả lời. Dò lại lịch sử vài lần để lấy trả lời đó thay vì bắt Hannah gửi lại.
+    const roiMang=/load failed|failed to fetch|networkerror|quá lâu|the network connection was lost|cancelled|timed out/i.test(err.message||'');
+    const before=replyCount((lastHistArr[guiCho?guiCho.id:chatA.id])||[]);
+    let lay=false;
+    if(roiMang&&guiCho){
+      if(dungChat())$('chatNote').textContent='📡 Mạng chờ lâu, đang đợi agent trả lời…';
+      for(let i=0;i<20;i++){
+        await new Promise(r=>setTimeout(r,5000));
+        try{
+          const h=await api('/history',{agent:guiCho.id});
+          if(replyCount(h.history)>before){lay=true;break;}
+          const st=await api('/status',{agent:guiCho.id}).catch(()=>null);
+          if(st&&st.status&&st.status.done){lay=true;break;}
+        }catch(_){}
+      }
+      if(lay){if(chatA&&chatA.id===guiCho.id){delete lastSig[guiCho.id];await loadHist().catch(()=>{});$('chatLog').scrollTop=1e9;}if(dungChat())$('chatNote').textContent='🔥 Xong';}
+    }
+    if(!lay)$('chatNote').textContent=(dungChat()?'😱 Lỗi: ':'😱 Lỗi ở chat '+guiCho.name+' (không phải chat này): ')+err.message+(roiMang?' — agent có thể vẫn đang chạy, Hannah đợi chút rồi mở lại chat để xem trả lời, đừng gửi lại kẻo trùng.':'');
+  }
   finally{sending=false;stopSt();pumpQueue();}
 };
 
