@@ -139,7 +139,7 @@ body.list-mode.light td{color:#1b2433}
 #imgViewer{position:fixed;inset:0;z-index:9999;background:rgba(10,10,20,.88);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
 #imgViewer img{max-width:100%;max-height:100%;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5);-webkit-user-select:none;user-select:none}
 #imgViewer[hidden]{display:none}
-.cimgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.cimgs .cimg{margin:0;max-width:150px}.fchip{display:inline-flex;align-items:center;max-width:100%;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.85);border:1px solid rgba(150,130,220,.45);color:#2b2f45;font-size:13px;line-height:1.3;overflow-wrap:anywhere;box-shadow:0 2px 8px rgba(120,100,200,.18)}
+.cimgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.cimgs .cimg{margin:0;max-width:200px;max-height:260px;object-fit:cover;border-radius:12px;cursor:zoom-in}.fchip{cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;max-width:100%;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.85);border:1px solid rgba(150,130,220,.45);color:#2b2f45;font-size:13px;line-height:1.3;overflow-wrap:anywhere;box-shadow:0 2px 8px rgba(120,100,200,.18)}
 #chatLog .tw td{color:#2b2f45}
 body.list-mode.light .pill-f{background:rgba(255,255,255,.7);color:#1b2433;border-color:rgba(255,255,255,.95)}
 body.list-mode.light .pill-f.on{background:linear-gradient(90deg,#b19cff,#7fb6ff);color:#fff}
@@ -573,7 +573,13 @@ body:not(.light) .tbl thead th:last-child{box-shadow:40px 0 0 #1a1238}
 .m.u::before{content:'';position:absolute;top:0;bottom:0;right:100%;width:96px}
 @media (min-width:700px){.m.b::before{content:'';position:absolute;top:0;bottom:0;left:100%;width:96px}}
 /* Điện thoại: nút Sao chép / Trả lời nằm DƯỚI bong bóng, luôn trong màn hình */
-@media (max-width:699px){
+/* Máy tính cũng hiển thị như điện thoại: nút Sao chép / Trả lời nằm dưới bong bóng, bong bóng không quá rộng */
+@media (min-width:700px){
+  #chat .m.u,#chat .m.b{max-width:min(78%,560px);margin-bottom:30px}
+  .m.u::after,.m.b::after{content:'';position:absolute;left:0;right:0;top:100%;height:34px}
+  .m.b::before{display:none}
+}
+@media all{
   .m.u .mtb,.m.b .mtb{top:100%;bottom:auto;transform:none;margin-top:4px}
   .m.u .mtb{right:4px;left:auto}
   .m.b .mtb{left:4px;right:auto}
@@ -1609,8 +1615,11 @@ const lastHistArr={};
 // Tin chỉ có file hiện là "📎 tên file" lúc chờ, còn trong lịch sử là "[đính kèm: tên file]": phải so theo cách đó, nếu không thẻ chờ sẽ nằm lại mãi dưới câu trả lời
 const pendKhop=(c,t)=>{c=String(c);return t.startsWith('📎 ')?c.trim()==='[đính kèm: '+t.slice(3)+']':c.endsWith(t);};
 const pendDem=(hist,t)=>(hist||[]).filter(m=>m.role==='user'&&pendKhop(m.content,t)).length;
-function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push({t:txt,c:pendDem(lastHistArr[id],txt)});savePend();}
-function pendPrune(id,hist){const daBo={};pendOut[id]=(pendOut[id]||[]).filter(p=>{const t=(p&&p.t!=null)?p.t:String(p);const c=(p&&p.c!=null)?p.c:0;const moi=pendDem(hist,t)-c-(daBo[t]||0);if(moi>0){daBo[t]=(daBo[t]||0)+1;return false;}return true;});savePend();}
+function pendAdd(id,txt){(pendOut[id]=pendOut[id]||[]).push({t:txt,c:pendDem(lastHistArr[id],txt),ts:Date.now()});savePend();}
+// Gửi lỗi hẳn: gỡ thẻ chờ của tin đó (lịch sử là nguồn đúng: nếu máy chủ đã lưu thì tin tự hiện lại từ lịch sử)
+function pendDrop(id,txt){const a=pendOut[id]||[];const i=a.findIndex(p=>((p&&p.t!=null)?p.t:String(p))===txt);if(i>=0){a.splice(i,1);savePend();}}
+function pendPrune(id,hist){const daBo={};const now=Date.now();pendOut[id]=(pendOut[id]||[]).filter(p=>{if(!p||!p.ts||now-p.ts>10*60*1000)return false; // thẻ chờ quá 10 phút (hoặc bản cũ không có giờ gửi) là tin đã lỗi, gỡ đi
+  const t=(p&&p.t!=null)?p.t:String(p);const c=(p&&p.c!=null)?p.c:0;const moi=pendDem(hist,t)-c-(daBo[t]||0);if(moi>0){daBo[t]=(daBo[t]||0)+1;return false;}return true;});savePend();}
 function pendRender(id){(pendOut[id]||[]).forEach(p=>bubble((p&&p.t!=null)?p.t:String(p),true));}
 async function loadHist(){
   if(performance.now()-typingAt<1200)return;
@@ -1684,7 +1693,44 @@ const isImgFile=f=>/^image\//.test(f.type||'')||/\.(jpe?g|png|webp|gif|heic|heif
 const THUMBS_KEY='vpd-thumbs';
 // Lưu bản xem trước nhỏ (360px) theo tên file để hiện lại khi tải lịch sử
 function saveThumb(name,src){try{const im=new Image();im.onload=()=>{try{const k=Math.min(1,360/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const o=LS.get(THUMBS_KEY,{});o[name]=c.toDataURL('image/jpeg',0.6);const ks=Object.keys(o);while(ks.length>30){delete o[ks.shift()];}LS.set(THUMBS_KEY,o);}catch(e){}};im.src=src;}catch(e){}}
-function addSavedThumbs(d,text){try{const mm=String(text||'').match(/^\[đính kèm: ([^\]]+)\]/);if(!mm)return;const o=LS.get(THUMBS_KEY,{});const names=mm[1].split(',').map(x=>x.trim()).filter(Boolean);if(!names.length)return;const box=document.createElement('div');box.className='cimgs';names.forEach(n=>{if(o[n]){const im=document.createElement('img');im.className='cimg';im.alt=n;im.src=o[n];box.appendChild(im);}else{const c=document.createElement('span');c.className='fchip';c.textContent='📎 '+n;box.appendChild(c);}});d.appendChild(box);}catch(e){}}
+// File đã gửi: lấy lại từ máy chủ (nên xem được trên mọi thiết bị, ảnh nét như bản gốc). Bản nhỏ trong máy chỉ để hiện tạm.
+const fileCache=new Map(),fileDone=new Map();
+function layFile(agentId,name){
+  const k=agentId+'|'+name;
+  if(!fileCache.has(k)){
+    fileCache.set(k,api('/file',{agent:agentId,name}).then(d=>{
+      const bin=atob(d.data);const arr=new Uint8Array(bin.length);for(let q=0;q<bin.length;q++)arr[q]=bin.charCodeAt(q);
+      const r={url:URL.createObjectURL(new Blob([arr],{type:d.type||'application/octet-stream'})),type:d.type||'',name:d.name||name};
+      fileDone.set(k,r);return r;
+    }).catch(e=>{fileCache.delete(k);throw e;}));
+  }
+  return fileCache.get(k);
+}
+const laAnh=n=>/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(n);
+function moFile(r){
+  if(/^image\//.test(r.type)||/pdf/i.test(r.type)){window.open(r.url,'_blank');return;}
+  const a=document.createElement('a');a.href=r.url;a.download=r.name;document.body.appendChild(a);a.click();a.remove();
+}
+function addSavedThumbs(d,text){try{
+  const mm=String(text||'').match(/^\[đính kèm: ([^\]]+)\]/);if(!mm)return;
+  const agentId=chatA&&chatA.id;if(!agentId)return;
+  const o=LS.get(THUMBS_KEY,{});const names=mm[1].split(',').map(x=>x.trim()).filter(Boolean);if(!names.length)return;
+  const box=document.createElement('div');box.className='cimgs';
+  names.forEach(n=>{
+    const k=agentId+'|'+n;
+    if(laAnh(n)){
+      const im=document.createElement('img');im.className='cimg';im.alt=n;
+      const sx=fileDone.get(k);
+      if(sx)im.src=sx.url;else if(o[n])im.src=o[n];else im.style.minHeight='60px';
+      box.appendChild(im);
+      if(!sx)layFile(agentId,n).then(r=>{im.src=r.url;im.style.minHeight='';}).catch(()=>{if(!o[n]){const c=document.createElement('span');c.className='fchip';c.textContent='📎 '+n+' (máy chủ không còn file)';im.replaceWith(c);}});
+    }else{
+      const a=document.createElement('a');a.className='fchip';a.href='#';a.textContent=(/pdf/i.test(n)?'📄 ':'📎 ')+n+' (mở)';
+      a.onclick=async e=>{e.preventDefault();try{const r=fileDone.get(k)||await layFile(agentId,n);moFile(r);}catch(err){a.textContent='📎 '+n+' (máy chủ không còn file này)';}};
+      box.appendChild(a);
+    }
+  });
+  d.appendChild(box);}catch(e){}}
 function addThumbs(files){
   try{
     const imgs=(files||[]).filter(f=>/^image\//.test(f.type||''));
@@ -1702,7 +1748,7 @@ function addThumbs(files){
       box.appendChild(a);
     });
     // File khác (CSV, Excel, Word...): hiện thẻ tên file ngay khi gửi, không chờ agent trả lời
-    khac.forEach(f=>{const c=document.createElement('span');c.className='fchip';c.textContent='📎 '+(f.name||'file');box.appendChild(c);});
+    khac.forEach(f=>{const c=document.createElement('a');c.className='fchip';c.href='#';c.textContent='📎 '+(f.name||'file')+' (mở)';c.onclick=e=>{e.preventDefault();try{const bin=atob(f.data);const arr=new Uint8Array(bin.length);for(let q=0;q<bin.length;q++)arr[q]=bin.charCodeAt(q);const u=URL.createObjectURL(new Blob([arr],{type:f.type||'application/octet-stream'}));const a=document.createElement('a');a.href=u;a.download=f.name||'file';document.body.appendChild(a);a.click();a.remove();}catch(err){$('chatNote').textContent='Không mở được file này';}};box.appendChild(c);});
     last.appendChild(box);
   }catch(e){}
 }
@@ -1766,7 +1812,8 @@ async function pumpQueue(){
   try{
     await Promise.race([api('/chat',{agent:it.agent,message:it.txt,files:it.files}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('quá lâu')),60000))]);
   }catch(err){
-    if(onIt)$('chatNote').textContent='😱 Tin xếp hàng lỗi: '+err.message;
+    pendDrop(it.agent,it.txt||('📎 '+(it.files||[]).map(f=>f.name).join(', ')));
+    if(onIt)$('chatNote').textContent='😱 Tin xếp hàng lỗi: '+err.message+'. Tin chưa vào lịch sử thì Hannah gửi lại nhé.';
   }
   queueBusy=false;
   if(onIt){await loadHist().catch(()=>{});}
@@ -1872,6 +1919,7 @@ $('chatForm').onsubmit=async e=>{const guiCho=chatA?{id:chatA.id,name:chatA.name
       }
       if(lay){if(chatA&&chatA.id===guiCho.id){delete lastSig[guiCho.id];await loadHist().catch(()=>{});$('chatLog').scrollTop=1e9;}if(dungChat())$('chatNote').textContent='🔥 Xong';}
     }
+    if(!lay){if(guiCho){pendDrop(guiCho.id,encSend||('📎 '+files.map(f=>f.name).join(', ')));if(chatA&&chatA.id===guiCho.id){delete lastSig[guiCho.id];await loadHist().catch(()=>{});}}}
     if(!lay)$('chatNote').textContent=(dungChat()?'😱 Lỗi: ':'😱 Lỗi ở chat '+guiCho.name+' (không phải chat này): ')+err.message+(roiMang?' — agent có thể vẫn đang chạy, Hannah đợi chút rồi mở lại chat để xem trả lời, đừng gửi lại kẻo trùng.':'');
   }
   finally{sending=false;stopSt();pumpQueue();}
